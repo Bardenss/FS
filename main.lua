@@ -1,10 +1,10 @@
 -- [[Whos M? ]]
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
-    Title = "RockHub - Fish It",
-    Icon = "rbxassetid://116236936447443",
+    Title = "BantaiXmarV - Fish It",
+    Icon = "rbxassetid://106735919480937",
     Author = "Premium Version",
-    Folder = "RockHub",
+    Folder = "BantaiXmarV",
     Size = UDim2.fromOffset(600, 360),
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
@@ -18,21 +18,21 @@ local Window = WindUI:CreateWindow({
 })
 
 -- [[ 1. CONFIGURATION SYSTEM SETUP ]] --
-local RockHubConfig = Window.ConfigManager:CreateConfig("rockhub")
+local BantaiXmarVConfig = Window.ConfigManager:CreateConfig("BantaiXmarV")
 
 -- [BARU] Tabel untuk menyimpan semua elemen UI agar bisa dicek valuenya
 local ElementRegistry = {} 
 
 -- Fungsi Helper Reg yang sudah di-upgrade
 local function Reg(id, element)
-    RockHubConfig:Register(id, element)
+    BantaiXmarVConfig:Register(id, element)
     -- Simpan elemen ke tabel lokal kita
     ElementRegistry[id] = element 
     return element
 end
 
 local HttpService = game:GetService("HttpService")
-local BaseFolder = "WindUI/" .. (Window.Folder or "RockHub") .. "/config/"
+local BaseFolder = "WindUI/" .. (Window.Folder or "BantaiXmarV") .. "/config/"
 
 local function SmartLoadConfig(configName)
     local path = BaseFolder .. configName .. ".json"
@@ -172,7 +172,7 @@ pcall(function()
     for i, v in pairs(getconnections(player.Idled)) do
         if v.Disable then
             v:Disable() -- Menonaktifkan koneksi event
-            print("[RockHub Anti-AFK] ON")
+            print("[BantaiXmarV Anti-AFK] ON")
         end
     end
 end)
@@ -279,13 +279,13 @@ do
         Promise = require(RepStorage:WaitForChild("Packages").Promise)
     end)
     
-    _G.RockHub_AutoAcceptTradeEnabled = false 
+    _G.BantaiXmarV_AutoAcceptTradeEnabled = false 
 
     if PromptController and PromptController.FirePrompt and Promise then
         local oldFirePrompt = PromptController.FirePrompt
         PromptController.FirePrompt = function(self, promptText, ...)
             
-            if _G.RockHub_AutoAcceptTradeEnabled and type(promptText) == "string" and promptText:find("Accept") and promptText:find("from:") then
+            if _G.BantaiXmarV_AutoAcceptTradeEnabled and type(promptText) == "string" and promptText:find("Accept") and promptText:find("from:") then
                 
                 local initiatorName = string.match(promptText, "from: ([^\n]+)") or "Seseorang"
                 
@@ -299,7 +299,7 @@ do
             return oldFirePrompt(self, promptText, ...)
         end
     else
-        warn("[RockHub] Gagal memuat PromptController/Promise untuk Auto Accept Trade.")
+        warn("[BantaiXmarV] Gagal memuat PromptController/Promise untuk Auto Accept Trade.")
     end
 end
 
@@ -329,7 +329,7 @@ local selectedRodUUID = nil
 local selectedEnchantNames = {}
 
 local ENCHANT_STONE_ID = 10
-_G.RockHub_EnchantStoneUUIDs = {}
+_G.BantaiXmarV_EnchantStoneUUIDs = {}
 
 local function GetEnchantNameFromId(id)
     id = tonumber(id)
@@ -1087,7 +1087,7 @@ do
     local isHideActive = false
     local hideConnection = nil
     
-    local customName = ".gg/RockHub"
+    local customName = ".gg/BantaiXmarV"
     local customLevel = "Lvl. 969" 
 
     local custname = Reg("cfakennme",other:Input({
@@ -1206,7 +1206,7 @@ do
         else
             if targetPlayer.Character then
                 for _, v in ipairs(targetPlayer.Character:GetChildren()) do
-                    if v.Name == "RockHubESP" and v:IsA("BillboardGui") then pcall(function() v:Destroy() end) end
+                    if v.Name == "BantaiXmarVESP" and v:IsA("BillboardGui") then pcall(function() v:Destroy() end) end
                 end
             end
         end
@@ -1221,7 +1221,7 @@ do
         if not hrp then return end
 
         local BillboardGui = Instance.new("BillboardGui")
-        BillboardGui.Name = "RockHubESP"
+        BillboardGui.Name = "BantaiXmarVESP"
         BillboardGui.Adornee = hrp
         BillboardGui.Size = UDim2.new(0, 140, 0, 40)
         BillboardGui.AlwaysOnTop = true
@@ -1680,7 +1680,7 @@ do
     local cancelDelay = 0.3
     local loopInterval = 1.715
     
-    _G.RockHub_BlatantActive = false
+    _G.BantaiXmarV_BlatantActive = false
 
     -- [[ 1. LOGIC KILLER: LUMPUHKAN CONTROLLER ]]
     task.spawn(function()
@@ -1691,11 +1691,11 @@ do
             
             -- Matikan fungsi charge & cast game asli saat Blatant ON
             FishingController.RequestChargeFishingRod = function(...)
-                if _G.RockHub_BlatantActive then return end 
+                if _G.BantaiXmarV_BlatantActive then return end 
                 return Old_Charge(...)
             end
             FishingController.SendFishingRequestToServer = function(...)
-                if _G.RockHub_BlatantActive then return false, "Blocked by RockHub" end
+                if _G.BantaiXmarV_BlatantActive then return false, "Blocked by BantaiXmarV" end
                 return Old_Cast(...)
             end
         end
@@ -1707,7 +1707,7 @@ do
     setreadonly(mt, false)
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
-        if _G.RockHub_BlatantActive and not checkcaller() then
+        if _G.BantaiXmarV_BlatantActive and not checkcaller() then
             -- Cegah game mengirim request mancing atau request update state
             if method == "InvokeServer" and (self.Name == "RequestFishingMinigameStarted" or self.Name == "ChargeFishingRod" or self.Name == "UpdateAutoFishingState") then
                 return nil 
@@ -1754,7 +1754,7 @@ do
                     ColorSequenceKeypoint.new(1, Color3.fromHex("ff2256"))
                 })
 
-                while _G.RockHub_BlatantActive do
+                while _G.BantaiXmarV_BlatantActive do
                     -- Cari tombol Auto Fishing (Bisa di Backpack atau tagged)
                     local targets = {}
                     
@@ -1837,7 +1837,7 @@ do
             if not checkFishingRemotes() then return end
             disableOtherModes("blatant")
             blatantInstantState = state
-            _G.RockHub_BlatantActive = state
+            _G.BantaiXmarV_BlatantActive = state
             
             -- Jalankan Visual Killer
             SuppressGameVisuals(state)
@@ -2961,7 +2961,7 @@ end
         Icon = "arrow-right-left",
         Value = false,
         Callback = function(state)
-            _G.RockHub_AutoAcceptTradeEnabled = state
+            _G.BantaiXmarV_AutoAcceptTradeEnabled = state
             
             if state then
                 WindUI:Notify({
@@ -4713,10 +4713,10 @@ do
     -- [UI] KAITUN OVERLAY (FIX Z-INDEX)
     -- =================================================================
     local function CreateKaitunUI()
-        local old = game.CoreGui:FindFirstChild("RockHubKaitunStats")
+        local old = game.CoreGui:FindFirstChild("BantaiXmarVKaitunStats")
         if old then old:Destroy() end
         local sg = Instance.new("ScreenGui")
-        sg.Name = "RockHubKaitunStats"
+        sg.Name = "BantaiXmarVKaitunStats"
         sg.Parent = game.CoreGui
         sg.IgnoreGuiInset = true
         sg.DisplayOrder = -50 
@@ -4741,7 +4741,7 @@ do
             return l
         end
         
-        txt("KAITUN ROCKHUB (PREMIUM)", 0.2, Color3.fromRGB(255,0,255), 35)
+        txt("KAITUN BantaiXmarV (PREMIUM)", 0.2, Color3.fromRGB(255,0,255), 35)
         local lLC = txt("Last Catch: None", 0.3, Color3.fromRGB(0,255,255))
         local lCoins = txt("Coins: ...", 0.4, Color3.fromRGB(255,215,0))
         local lGear = txt("Best Rod: ... | Best Bait: ...", 0.45) 
@@ -7458,7 +7458,7 @@ local CutsceneController = nil
                 -- 1. Buat GUI Hitam di PlayerGui (Bukan CoreGui)
                 if not _G.BlackScreenGUI then
                     _G.BlackScreenGUI = Instance.new("ScreenGui")
-                    _G.BlackScreenGUI.Name = "RockHub_BlackBackground"
+                    _G.BlackScreenGUI.Name = "BantaiXmarV_BlackBackground"
                     _G.BlackScreenGUI.IgnoreGuiInset = true
                     -- [-999] = Taruh di paling belakang (di bawah UI Game), tapi nutupin world 3D
                     _G.BlackScreenGUI.DisplayOrder = -999 
@@ -7652,7 +7652,7 @@ utility:Divider()
 
             if #Players:GetPlayers() <= 1 then
                 -- Kalau sendiri, Teleport biasa (akan buat server baru/masuk ulang)
-                Players.LocalPlayer:Kick("\n[RockHub] Rejoining...")
+                Players.LocalPlayer:Kick("\n[BantaiXmarV] Rejoining...")
                 task.wait()
                 TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
             else
@@ -7867,7 +7867,7 @@ utility:Divider()
             if state then
                 -- [LOGIKA FIX]: Simpan state asli sebelum dimatikan
                 for _, gui in ipairs(PlayerGui:GetChildren()) do
-                    if gui:IsA("ScreenGui") and gui.Name ~= "WindUI" and gui.Name ~= "CustomFloatingIcon_RockHub" then
+                    if gui:IsA("ScreenGui") and gui.Name ~= "WindUI" and gui.Name ~= "CustomFloatingIcon_BantaiXmarV" then
                         -- Simpan status 'Enabled' saat ini ke Attribute
                         gui:SetAttribute("OriginalState", gui.Enabled)
                         gui.Enabled = false
@@ -8040,7 +8040,7 @@ do
 
     -- Variabel lokal untuk menyimpan data
     local WEBHOOK_URL = ""
-    local WEBHOOK_USERNAME = "RockHub Notify" 
+    local WEBHOOK_USERNAME = "BantaiXmarV Notify" 
     local isWebhookEnabled = false
     local SelectedRarityCategories = {}
     local SelectedWebhookItemNames = {} -- Variabel baru untuk filter nama
@@ -8064,7 +8064,7 @@ do
     
     -- Variabel KHUSUS untuk Global Webhook
     local GLOBAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1438756450972471387/gHuV9K4UmiTjqK3F9KRt720HkGvLJGogwJ9uh17b7QpqMd1ieBC_UdKAX95ozTanWH37"
-    local GLOBAL_WEBHOOK_USERNAME = "RockHub | Community"
+    local GLOBAL_WEBHOOK_USERNAME = "BantaiXmarV | Community"
     local GLOBAL_RARITY_FILTER = {"SECRET", "TROPHY", "COLLECTIBLE", "DEV"}
 
     local RarityList = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret", "Trophy", "Collectible", "DEV"}
@@ -8252,7 +8252,7 @@ do
             local isUserFilterMatch = shouldNotify(fishRarityUpper, metadata, fishName)
 
             if isWebhookEnabled and WEBHOOK_URL ~= "" and isUserFilterMatch then
-                local title_private = string.format("<:TEXTURENOBG:1438662703722790992> RockHub | Webhook\n\n<a:ChipiChapa:1438661193857503304> New Fish Caught! (%s)", fishName)
+                local title_private = string.format("<:TEXTURENOBG:1438662703722790992> BantaiXmarV | Webhook\n\n<a:ChipiChapa:1438661193857503304> New Fish Caught! (%s)", fishName)
                 
                 local embed = {
                     title = title_private,
@@ -8269,7 +8269,7 @@ do
                     },
                     thumbnail = { url = imageUrl },
                     footer = {
-                        text = string.format("RockHub Webhook • Total Caught: %s • %s", caughtDisplay, os.date("%Y-%m-%d %H:%M:%S"))
+                        text = string.format("BantaiXmarV Webhook • Total Caught: %s • %s", caughtDisplay, os.date("%Y-%m-%d %H:%M:%S"))
                     }
                 }
                 local success_send, message = sendExploitWebhook(WEBHOOK_URL, WEBHOOK_USERNAME, embed)
@@ -8290,7 +8290,7 @@ do
                 local playerName = LocalPlayer.DisplayName or LocalPlayer.Name
                 local censoredPlayerName = CensorName(playerName)
                 
-                local title_global = string.format("<:TEXTURENOBG:1438662703722790992> RockHub | Global Tracker\n\n<a:globe:1438758633151266818> GLOBAL CATCH! %s", fishName)
+                local title_global = string.format("<:TEXTURENOBG:1438662703722790992> BantaiXmarV | Global Tracker\n\n<a:globe:1438758633151266818> GLOBAL CATCH! %s", fishName)
 
                 local globalEmbed = {
                     title = title_global,
@@ -8303,7 +8303,7 @@ do
                     },
                     thumbnail = { url = imageUrl },
                     footer = {
-                        text = string.format("RockHub Community| Player: %s | %s", censoredPlayerName, os.date("%Y-%m-%d %H:%M:%S"))
+                        text = string.format("BantaiXmarV Community| Player: %s | %s", censoredPlayerName, os.date("%Y-%m-%d %H:%M:%S"))
                     }
                 }
                 
@@ -8314,7 +8314,7 @@ do
         end)
         
         if not success then
-            warn("[RockHub Webhook] Error processing fish data:", results)
+            warn("[BantaiXmarV Webhook] Error processing fish data:", results)
         end
     end
     
@@ -8413,7 +8413,7 @@ do
                 return
             end
             local testEmbed = {
-                title = "RockHub Webhook Test",
+                title = "BantaiXmarV Webhook Test",
                 description = "Success <a:ChipiChapa:1438661193857503304>",
                 color = 0x00FF00,
                 fields = {
@@ -8422,7 +8422,7 @@ do
                     { name = "Cache System", value = "Active ✅", inline = true }
                 },
                 footer = {
-                    text = "RockHub Webhook Test"
+                    text = "BantaiXmarV Webhook Test"
                 }
             }
             local success, message = sendExploitWebhook(WEBHOOK_URL, WEBHOOK_USERNAME, testEmbed)
@@ -8449,8 +8449,8 @@ do
 
     -- Variabel Lokal
     local ConfigManager = Window.ConfigManager
-    local SelectedConfigName = "rockhub" -- Default
-    local BaseFolder = "WindUI/" .. (Window.Folder or "RockHub") .. "/config/"
+    local SelectedConfigName = "BantaiXmarV" -- Default
+    local BaseFolder = "WindUI/" .. (Window.Folder or "BantaiXmarV") .. "/config/"
 
     -- Helper: Update Dropdown
     local function RefreshConfigList(dropdown)
@@ -8462,7 +8462,7 @@ do
     local ConfigNameInput = ConfigSection:Input({
         Title = "Config Name",
         Desc = "Nama config baru/yang akan disimpan.",
-        Value = "rockhub",
+        Value = "BantaiXmarV",
         Placeholder = "e.g. LegitFarming",
         Icon = "file-pen",
         Callback = function(text)
@@ -8474,7 +8474,7 @@ do
         Title = "Available Configs",
         Desc = "Pilih file config yang ada.",
         Values = ConfigManager:AllConfigs() or {"None"},
-        Value = "rockhub",
+        Value = "BantaiXmarV",
         AllowNone = true,
         Callback = function(val)
             if val and val ~= "None" then
@@ -8501,14 +8501,14 @@ do
         Callback = function()
             if SelectedConfigName == "" then return end
             
-            -- 1. Save ke config utama dulu ("rockhub.json")
-            RockHubConfig:Save()
+            -- 1. Save ke config utama dulu ("BantaiXmarV.json")
+            BantaiXmarVConfig:Save()
             task.wait(0.1)
 
-            -- 2. Jika nama beda, salin isi "rockhub.json" ke "NamaBaru.json"
-            if SelectedConfigName ~= "rockhub" then
+            -- 2. Jika nama beda, salin isi "BantaiXmarV.json" ke "NamaBaru.json"
+            if SelectedConfigName ~= "BantaiXmarV" then
                 local success, err = pcall(function()
-                    local mainContent = readfile(BaseFolder .. "rockhub.json")
+                    local mainContent = readfile(BaseFolder .. "BantaiXmarV.json")
                     writefile(BaseFolder .. SelectedConfigName .. ".json", mainContent)
                 end)
                 
@@ -8541,7 +8541,7 @@ do
         Icon = "trash-2",
         Color = Color3.fromRGB(255, 80, 80),
         Callback = function()
-            if SelectedConfigName == "" or SelectedConfigName == "rockhub" then 
+            if SelectedConfigName == "" or SelectedConfigName == "BantaiXmarV" then 
                 WindUI:Notify({ Title = "Gagal", Content = "Tidak bisa hapus config default/kosong.", Duration = 3 })
                 return 
             end
@@ -8552,8 +8552,8 @@ do
                 delfile(path)
                 WindUI:Notify({ Title = "Deleted", Content = SelectedConfigName .. " dihapus.", Duration = 2, Icon = "trash" })
                 RefreshConfigList(ConfigDropdown)
-                ConfigNameInput:Set("rockhub")
-                SelectedConfigName = "rockhub"
+                ConfigNameInput:Set("BantaiXmarV")
+                SelectedConfigName = "BantaiXmarV"
             else
                 WindUI:Notify({ Title = "Error", Content = "File tidak ditemukan.", Duration = 3, Icon = "x" })
             end
@@ -8563,7 +8563,7 @@ do
     -- Info Tambahan
     --ConfigSection:Paragraph({
         --Title = "Auto-Save Active",
-       -- Desc = "Script otomatis menyimpan ke 'rockhub.json' setiap 30 detik.",
+       -- Desc = "Script otomatis menyimpan ke 'BantaiXmarV.json' setiap 30 detik.",
       --  Icon = "info"
  --   })
 end
@@ -8576,24 +8576,24 @@ do
     })
 
     about:Section({
-        Title = "Join Discord Server RockHub",
+        Title = "Join Discord Server BantaiXmarV",
         TextSize = 20,
     })
 
     about:Paragraph({
-        Title = "RockHub Community",
+        Title = "BantaiXmarV Community",
         Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
-        Image = "rbxassetid://122210708834535",
+        Image = "rbxassetid://106735919480937",
         ImageSize = 24,
         Buttons = {
             {
                 Title = "Copy Link",
                 Icon = "link",
                 Callback = function()
-                    setclipboard("https://dsc.gg/rockhub")
+                    setclipboard("https://dsc.gg/BantaiXmarV")
                     WindUI:Notify({
                         Title = "Link Disalin!",
-                        Content = "Link Discord RockHub berhasil disalin.",
+                        Content = "Link Discord BantaiXmarV berhasil disalin.",
                         Duration = 3,
                         Icon = "copy",
                     })
@@ -8611,29 +8611,12 @@ do
     })
 
     about:Image({
-        Image = "rbxassetid://122210708834535",
+        Image = "rbxassetid://93981165425485",
         AspectRatio = "16:9",
         Radius = 9,
     })
 
     about:Space()
-
-    about:Paragraph({
-        Title = "Version 1.0.0",
-        Desc = "MukaLoJelek",
-    })
-    about:Paragraph({
-        Title = "Version 1.0.1",
-        Desc = "mukalojelek",
-    })
-    about:Paragraph({
-        Title = "Version 1.0.2",
-        Desc = "mukalojelek",
-    })
-    about:Paragraph({
-        Title = "Version 1.0.3",
-        Desc = "mukalojelek",
-    })
 end
 
 Window:Tag({
@@ -8643,8 +8626,8 @@ Window:Tag({
 })
 
 Window:EditOpenButton({
-    Title = "RockHub - Fish It",
-    Icon = "rbxassetid://116236936447443",
+    Title = "BantaiXmarV - Fish It",
+    Icon = "rbxassetid://106735919480937",
     CornerRadius = UDim.new(0,30),
     StrokeThickness = 1.5,
     Color = ColorSequence.new(
@@ -8673,11 +8656,11 @@ local dragStart = nil
 local startPos = nil
 
 local function CreateFloatingIcon()
-    local existingGui = PlayerGui:FindFirstChild("CustomFloatingIcon_RockHub")
+    local existingGui = PlayerGui:FindFirstChild("CustomFloatingIcon_BantaiXmarV")
     if existingGui then existingGui:Destroy() end
 
     local FloatingIconGui = Instance.new("ScreenGui")
-    FloatingIconGui.Name = "CustomFloatingIcon_RockHub"
+    FloatingIconGui.Name = "CustomFloatingIcon_BantaiXmarV"
     FloatingIconGui.DisplayOrder = 999
     FloatingIconGui.ResetOnSpawn = false 
 
@@ -8708,7 +8691,7 @@ local function CreateFloatingIcon()
     -- Icon Gambar
     local IconImage = Instance.new("ImageLabel")
     IconImage.Name = "Icon"
-    IconImage.Image = "rbxassetid://122210708834535"
+    IconImage.Image = "rbxassetid://106735919480937"
     IconImage.BackgroundTransparency = 1
     IconImage.Size = UDim2.new(1, -4, 1, -4) 
     IconImage.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -8820,19 +8803,19 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     InitializeIcon()
 end)
 
-WindUI:Notify({ Title = "RockHub Was Loaded", Content = "Press [F] to open/close the menu", Duration = 5, Icon = "info" })
+WindUI:Notify({ Title = "BantaiXmarV Was Loaded", Content = "Press [F] to open/close the menu", Duration = 5, Icon = "info" })
 -- [[ AUTO LOAD & SAVE LOOP ]]
 task.spawn(function()
     task.wait(2) -- Tunggu UI load sempurna
     
     -- Ganti Load biasa dengan Smart Load
-    -- Default load "rockhub", atau nama config terakhir user kalau kamu simpan
-    SmartLoadConfig("rockhub") 
+    -- Default load "BantaiXmarV", atau nama config terakhir user kalau kamu simpan
+    SmartLoadConfig("BantaiXmarV") 
     
     -- Auto Save Loop (Setiap 30 detik) -- Save tetap pakai cara biasa gapapa
     while true do
          task.wait(10)
-         pcall(function() RockHubConfig:Save() end)
+         pcall(function() BantaiXmarVConfig:Save() end)
     end
 end)
 InitializeIcon()
