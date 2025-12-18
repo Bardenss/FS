@@ -9,7 +9,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
     Transparent = true,
-    Theme = "Rose",
+    Theme = "Green",
     Resizable = true,
     SideBarWidth = 190,
     BackgroundImageTransparency = 0.42,
@@ -8632,8 +8632,8 @@ Window:EditOpenButton({
     CornerRadius = UDim.new(0,30),
     StrokeThickness = 1.5,
     Color = ColorSequence.new(
-        Color3.fromHex("FF0F7B"),
-        Color3.fromHex("F89B29")
+        Color3.fromHex("00FF00"),
+        Color3.fromHex("FF00FF")
     ),
     OnlyMobile = false,
     Enabled = true,
@@ -8678,7 +8678,7 @@ local function CreateFloatingIcon()
 
     -- Stroke/Garis Tepi
     local FrameStroke = Instance.new("UIStroke")
-    FrameStroke.Color = Color3.fromHex("FF0F7B")
+    FrameStroke.Color = Color3.fromHex("00FF00")
     FrameStroke.Thickness = 2
     FrameStroke.Transparency = 0
     FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
