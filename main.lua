@@ -9,7 +9,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
     Transparent = true,
-    Theme = "Rose",
+    Theme = "Green",
     Resizable = true,
     SideBarWidth = 190,
     BackgroundImageTransparency = 0.42,
@@ -33,7 +33,10 @@ end
 
 local HttpService = game:GetService("HttpService")
 local BaseFolder = "WindUI/" .. (Window.Folder or "BantaiXmarV") .. "/config/"
-
+local fps = 0
+local frameCount = 0
+local lastTime = tick()
+local ms = 0
 local function SmartLoadConfig(configName)
     local path = BaseFolder .. configName .. ".json"
     
@@ -8581,7 +8584,7 @@ do
     })
 
     about:Paragraph({
-        Title = "BantaiXmarV Community",
+        Title = "BantaiXmarV",
         Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
         Image = "rbxassetid://106735919480937",
         ImageSize = 24,
@@ -8591,6 +8594,28 @@ do
                 Icon = "link",
                 Callback = function()
                     setclipboard("https://dsc.gg/BantaiXmarV")
+                    WindUI:Notify({
+                        Title = "Link Disalin!",
+                        Content = "Link Discord BantaiXmarV berhasil disalin.",
+                        Duration = 3,
+                        Icon = "copy",
+                    })
+                end,
+            }
+        }
+    })
+	
+	about:Paragraph({
+        Title = "MarV Community",
+        Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
+        Image = "rbxassetid://106735919480937",
+        ImageSize = 24,
+        Buttons = {
+            {
+                Title = "Copy Link",
+                Icon = "link",
+                Callback = function()
+                    setclipboard("https://discord.gg/gKrCTy62ak")
                     WindUI:Notify({
                         Title = "Link Disalin!",
                         Content = "Link Discord BantaiXmarV berhasil disalin.",
@@ -8677,7 +8702,7 @@ local function CreateFloatingIcon()
 
     -- Stroke/Garis Tepi
     local FrameStroke = Instance.new("UIStroke")
-    FrameStroke.Color = Color3.fromHex("FF0F7B")
+    FrameStroke.Color = Color3.fromHex("#00FF00")
     FrameStroke.Thickness = 2
     FrameStroke.Transparency = 0
     FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
