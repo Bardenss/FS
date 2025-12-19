@@ -8039,14 +8039,15 @@ local webhook = Window:Tab({
 })
 
 -- Variabel lokal untuk menyimpan data
-local WEB_SERVER_URL = "https://bantaigunung.my.id/webhookfish.php" 
-local API_KEY = "GN-88-99-JJ" 
-local WEBHOOK_URL = "" 
+local WEB_SERVER_URL = "https://bantaigunung.my.id/webhookfish.php" -- URL ke script PHP Anda
+local API_KEY = "GN-88-99-JJ" -- API Key yang sama dengan di PHP
+local WEBHOOK_URL = "" -- Variabel untuk URL webhook pribadi pengguna
 local WEBHOOK_USERNAME = "BantaiXmarV Notify" 
 local isWebhookEnabled = false
 local SelectedRarityCategories = {}
-local SelectedWebhookItemNames = {} 
+local SelectedWebhookItemNames = {} -- Variabel baru untuk filter nama
 
+-- Kita butuh daftar nama item (Copy fungsi helper ini ke dalam tab webhook atau taruh di global scope)
 local function getWebhookItemOptions()
     local itemNames = {}
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8072,7 +8073,7 @@ local WebhookStatusParagraph -- Forward declaration
 -- ============================================================
 -- 🖼️ SISTEM CACHE GAMBAR (BARU)
 -- ============================================================
-local ImageURLCache = {} 
+local ImageURLCache = {} -- Table untuk menyimpan Link Gambar (ID -> URL)
 
 -- FUNGSI HELPER: Format Angka (Updated: Full Digit dengan Titik)
 local function FormatNumber(n)
@@ -8116,12 +8117,12 @@ local function GetRobloxAssetImage(assetId)
     return nil
 end
 
--- FUNGSI UNTUK MENGIRIM KE SERVER WEB 
+-- FUNGSI UNTUK MENGIRIM KE SERVER WEB (BUKAN DISCORD LANGSUNG)
 local function sendToWebServer(embed_data, webhook_type)
     local payload = {
         api_key = API_KEY,
         embed = embed_data,
-        webhook_type = webhook_type 
+        webhook_type = webhook_type -- Tambahkan tipe webhook ke payload
     }
     
     local json_data = HttpService:JSONEncode(payload)
@@ -8154,7 +8155,7 @@ local function sendToWebServer(embed_data, webhook_type)
     return false, "No Request Func"
 end
 
--- FUNGSI UNTUK MENGIRIM KE WEBHOOK DISCORD LANGSUNG
+-- FUNGSI UNTUK MENGIRIM KE WEBHOOK DISCORD LANGSUNG (untuk pribadi)
 local function sendExploitWebhook(url, username, embed_data)
     local payload = {
         username = username,
