@@ -1,4 +1,52 @@
 -- [[Whos M? ]]
+-- Custom Authentication GUI
+local authGui = Instance.new("ScreenGui")
+authGui.Name = "AuthGui"
+authGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0.3, 0, 0.2, 0)
+frame.Position = UDim2.new(0.35, 0, 0.4, 0)
+frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.new(0.5, 0.5, 0.5)
+frame.Parent = authGui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.3, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Enter Activation Key"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextSize = 18
+title.Font = Enum.Font.GothamBold
+title.BackgroundTransparency = 1
+title.Parent = frame
+
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(0.8, 0, 0.4, 0)
+textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+textBox.PlaceholderText = "e.g., 112233"
+textBox.TextColor3 = Color3.new(1, 1, 1)
+textBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+textBox.TextSize = 14
+textBox.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0.8, 0, 0.3, 0)
+button.Position = UDim2.new(0.1, 0, 0.7, 0)
+button.Text = "Verify Key"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+button.TextSize = 14
+button.Parent = frame
+
+-- Button Click Handler
+button.MouseButton1Click:Connect(function()
+    local enteredKey = textBox.Text
+    enteredKey = string.match(enteredKey, "^%s*(.-)%s*$") or enteredKey -- Trim spaces
+    
+    if enteredKey == "112233" then -- Valid key
+        authGui:Destroy() -- Remove auth GUI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "BantaiXmarV - Fish It",
@@ -25,97 +73,6 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
--- =================================================================
--- 🚨 AUTHENTICATION SYSTEM (NEW)
--- =================================================================
-local VALID_KEY = "112233" -- <-- PASTIKAN INI SAMA DENGAN YANG ANDA MASUKKAN
-local isAuthenticated = false
-local authTabCreated = false
-
--- Fungsi trim untuk menghapus spasi di awal dan akhir string (Lua tidak punya string.trim bawaan)
-local function trim(s)
-    return s:match("^%s*(.-)%s*$")
-end
-
--- Fungsi untuk mengecek status autentikasi saat script dimuat
-local function CheckAuthStatusOnLoad()
-    if isfile("WindUI/BantaiXmarV/auth_status.txt") then
-        local status = readfile("WindUI/BantaiXmarV/auth_status.txt")
-        if status == "authenticated" then
-            isAuthenticated = true
-            -- Aktifkan semua tab utama
-            Window:SetEnabled(true)
-            -- Nonaktifkan tab autentikasi
-            if authTab then
-                Window:SetEnabled(false, "Authentication")
-            end
-        end
-    end
-end
-
--- Fungsi untuk verifikasi key (Diperbaiki untuk debugging)
-local function VerifyKey()
-    local enteredKey = authInput and authInput.Value or ""
-    enteredKey = trim(enteredKey) -- Hapus spasi di awal/akhir input
-    
-    -- DEBUG: Cetak nilai ke console untuk memeriksa
-    print("DEBUG: Valid Key = '" .. VALID_KEY .. "'")
-    print("DEBUG: Entered Key = '" .. enteredKey .. "'")
-    
-    if enteredKey == VALID_KEY then
-        isAuthenticated = true
-        
-        -- Aktifkan semua tab utama
-        Window:SetEnabled(true)
-        
-        -- Nonaktifkan tab autentikasi
-        if authTab then
-            Window:SetEnabled(false, "Authentication")
-        end
-        
-        WindUI:Notify({ Title = "Authentication Successful!", Content = "All features unlocked.", Duration = 3, Icon = "check" })
-        
-        -- Simpan status autentikasi ke file
-        writefile("WindUI/BantaiXmarV/auth_status.txt", "authenticated")
-        
-    else
-        WindUI:Notify({ Title = "Authentication Failed", Content = "Invalid key. Please try again.", Duration = 3, Icon = "x" })
-    end
-end
-
--- Buat tab Autentikasi (akan ditampilkan pertama kali)
-local authTab = Window:Tab({
-    Title = "Authentication",
-    Icon = "key",
-    Locked = false,
-})
-
--- Input untuk memasukkan key
-local authInput = authTab:Input({
-    Title = "Enter Activation Key",
-    Desc = "Enter your premium key to unlock all features.",
-    Value = "",
-    Placeholder = "e.g., 112233",
-    Icon = "lock",
-    Callback = function(text) end -- Tidak perlu callback di sini, tombol handle
-})
-
--- Tombol verifikasi
-authTab:Button({
-    Title = "Verify Key",
-    Icon = "check-circle",
-    Callback = VerifyKey
-})
-
--- Mulai: Nonaktifkan semua tab kecuali tab autentikasi
-Window:SetEnabled(false) -- Nonaktifkan semua tab
-Window:SetEnabled(true, "Authentication") -- Aktifkan hanya tab autentikasi
-
--- Cek status autentikasi saat script dimuat
-CheckAuthStatusOnLoad()
--- =================================================================
--- END OF AUTHENTICATION SYSTEM
--- =================================================================
 
 -- Background Image Settings
 Window:SetBackgroundImage("rbxassetid://106735919480937")
