@@ -25,7 +25,6 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
-
 -- =================================================================
 -- 🚨 AUTHENTICATION SYSTEM (NEW)
 -- =================================================================
@@ -33,14 +32,20 @@ local VALID_KEY = "112233" -- <-- PASTIKAN INI SAMA DENGAN YANG ANDA MASUKKAN
 local isAuthenticated = false
 local authTabCreated = false
 
+-- Fungsi trim untuk menghapus spasi di awal dan akhir string (Lua tidak punya string.trim bawaan)
+local function trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
 -- Fungsi untuk mengecek status autentikasi saat script dimuat
 local function CheckAuthStatusOnLoad()
     if isfile("WindUI/BantaiXmarV/auth_status.txt") then
         local status = readfile("WindUI/BantaiXmarV/auth_status.txt")
         if status == "authenticated" then
             isAuthenticated = true
-            Window:SetEnabled(true) -- Aktifkan semua tab
-            -- Nonaktifkan tab autentikasi jika sudah ada
+            -- Aktifkan semua tab utama
+            Window:SetEnabled(true)
+            -- Nonaktifkan tab autentikasi
             if authTab then
                 Window:SetEnabled(false, "Authentication")
             end
@@ -51,7 +56,7 @@ end
 -- Fungsi untuk verifikasi key (Diperbaiki untuk debugging)
 local function VerifyKey()
     local enteredKey = authInput and authInput.Value or ""
-    enteredKey = string.trim(enteredKey) -- Hapus spasi di awal/akhir input
+    enteredKey = trim(enteredKey) -- Hapus spasi di awal/akhir input
     
     -- DEBUG: Cetak nilai ke console untuk memeriksa
     print("DEBUG: Valid Key = '" .. VALID_KEY .. "'")
