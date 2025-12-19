@@ -15,7 +15,20 @@ local Window = WindUI:CreateWindow({
     BackgroundImageTransparency = 0.42,
     HideSearchBar = true,
     ScrollBarEnabled = true,
+    Background = "rbxassetid://106735919480937",
+    
+    User = {
+        Enabled = true,
+        Anonymous = true,
+        Callback = function()
+            -- Nothing
+        end,
+    },
 })
+
+-- Background Image Settings
+Window:SetBackgroundImage("rbxassetid://106735919480937")
+Window:SetBackgroundImageTransparency(0.9)
 
 -- [[ 1. CONFIGURATION SYSTEM SETUP ]] --
 local BantaiXmarVConfig = Window.ConfigManager:CreateConfig("BantaiXmarV")
