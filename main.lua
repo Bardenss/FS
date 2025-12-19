@@ -9,7 +9,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
     Transparent = true,
-    Theme = "Midnight",
+    Theme = "Rose",
     Resizable = true,
     SideBarWidth = 190,
     BackgroundImageTransparency = 0.42,
@@ -25,6 +25,86 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
+-- =================================================================
+-- 🚨 AUTHENTICATION SYSTEM (NEW)
+-- =================================================================
+local VALID_KEY = "112233" -- <-- GANTI DENGAN KEY ANDA
+local isAuthenticated = false
+local authTabCreated = false
+
+-- Fungsi untuk mengecek status autentikasi saat script dimuat
+local function CheckAuthStatusOnLoad()
+    if isfile("WindUI/BantaiXmarV/auth_status.txt") then
+        local status = readfile("WindUI/BantaiXmarV/auth_status.txt")
+        if status == "authenticated" then
+            isAuthenticated = true
+            Window:SetEnabled(true) -- Aktifkan semua tab
+            -- Nonaktifkan tab autentikasi jika sudah ada
+            if authTab then
+                Window:SetEnabled(false, "Authentication")
+            end
+        end
+    end
+end
+
+-- Fungsi untuk verifikasi key
+local function VerifyKey()
+    local enteredKey = authInput and authInput.Value or ""
+    
+    if enteredKey == VALID_KEY then
+        isAuthenticated = true
+        
+        -- Aktifkan semua tab utama
+        Window:SetEnabled(true)
+        
+        -- Nonaktifkan tab autentikasi
+        if authTab then
+            Window:SetEnabled(false, "Authentication")
+        end
+        
+        WindUI:Notify({ Title = "Authentication Successful!", Content = "All features unlocked.", Duration = 3, Icon = "check" })
+        
+        -- Simpan status autentikasi ke file
+        writefile("WindUI/BantaiXmarV/auth_status.txt", "authenticated")
+        
+    else
+        WindUI:Notify({ Title = "Authentication Failed", Content = "Invalid key. Please try again.", Duration = 3, Icon = "x" })
+    end
+end
+
+-- Buat tab Autentikasi (akan ditampilkan pertama kali)
+local authTab = Window:Tab({
+    Title = "Authentication",
+    Icon = "key",
+    Locked = false,
+})
+
+-- Input untuk memasukkan key
+local authInput = authTab:Input({
+    Title = "Enter Activation Key",
+    Desc = "Enter your premium key to unlock all features.",
+    Value = "",
+    Placeholder = "e.g., BANTAI_XMARV_2024",
+    Icon = "lock",
+    Callback = function(text) end -- Tidak perlu callback di sini, tombol handle
+})
+
+-- Tombol verifikasi
+authTab:Button({
+    Title = "Verify Key",
+    Icon = "check-circle",
+    Callback = VerifyKey
+})
+
+-- Mulai: Nonaktifkan semua tab kecuali tab autentikasi
+Window:SetEnabled(false) -- Nonaktifkan semua tab
+Window:SetEnabled(true, "Authentication") -- Aktifkan hanya tab autentikasi
+
+-- Cek status autentikasi saat script dimuat
+CheckAuthStatusOnLoad()
+-- =================================================================
+-- END OF AUTHENTICATION SYSTEM
+-- =================================================================
 
 -- Background Image Settings
 Window:SetBackgroundImage("rbxassetid://106735919480937")
