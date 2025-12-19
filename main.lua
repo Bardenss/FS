@@ -25,10 +25,11 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
+
 -- =================================================================
 -- 🚨 AUTHENTICATION SYSTEM (NEW)
 -- =================================================================
-local VALID_KEY = "112233" -- <-- GANTI DENGAN KEY ANDA
+local VALID_KEY = "112233" -- <-- PASTIKAN INI SAMA DENGAN YANG ANDA MASUKKAN
 local isAuthenticated = false
 local authTabCreated = false
 
@@ -47,9 +48,14 @@ local function CheckAuthStatusOnLoad()
     end
 end
 
--- Fungsi untuk verifikasi key
+-- Fungsi untuk verifikasi key (Diperbaiki untuk debugging)
 local function VerifyKey()
     local enteredKey = authInput and authInput.Value or ""
+    enteredKey = string.trim(enteredKey) -- Hapus spasi di awal/akhir input
+    
+    -- DEBUG: Cetak nilai ke console untuk memeriksa
+    print("DEBUG: Valid Key = '" .. VALID_KEY .. "'")
+    print("DEBUG: Entered Key = '" .. enteredKey .. "'")
     
     if enteredKey == VALID_KEY then
         isAuthenticated = true
@@ -84,7 +90,7 @@ local authInput = authTab:Input({
     Title = "Enter Activation Key",
     Desc = "Enter your premium key to unlock all features.",
     Value = "",
-    Placeholder = "e.g., BANTAI_XMARV_2024",
+    Placeholder = "e.g., 112233",
     Icon = "lock",
     Callback = function(text) end -- Tidak perlu callback di sini, tombol handle
 })
