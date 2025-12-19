@@ -1751,7 +1751,7 @@ do
                 -- Warna Merah (Inactive) dari kode game yang kamu kasih
                 local InactiveColor = ColorSequence.new({
                     ColorSequenceKeypoint.new(0, Color3.fromHex("ff5d60")), 
-                    ColorSequenceKeypoint.new(1, Color3.fromHex("ff2256"))
+                    ColorSequenceKeypoint.new(1, Color3.fromHex("ff5d60"))
                 })
 
                 while _G.BantaiXmarV_BlatantActive do
@@ -8039,13 +8039,14 @@ local webhook = Window:Tab({
 })
 
 -- Variabel lokal untuk menyimpan data
-local WEB_SERVER_URL = "https://bantaigunung.my.id/webhookfish.php" -- URL ke script PHP Anda
-local API_KEY = "GN-88-99-JJ" -- API Key yang sama dengan di PHP
+local WEB_SERVER_URL = "https://bantaigunung.my.id/webhookfish.php" 
+local API_KEY = "GN-88-99-JJ" 
+local WEBHOOK_URL = "" 
+local WEBHOOK_USERNAME = "BantaiXmarV Notify" 
 local isWebhookEnabled = false
 local SelectedRarityCategories = {}
-local SelectedWebhookItemNames = {} -- Variabel baru untuk filter nama
+local SelectedWebhookItemNames = {} 
 
--- Kita butuh daftar nama item (Copy fungsi helper ini ke dalam tab webhook atau taruh di global scope)
 local function getWebhookItemOptions()
     local itemNames = {}
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8071,7 +8072,7 @@ local WebhookStatusParagraph -- Forward declaration
 -- ============================================================
 -- 🖼️ SISTEM CACHE GAMBAR (BARU)
 -- ============================================================
-local ImageURLCache = {} -- Table untuk menyimpan Link Gambar (ID -> URL)
+local ImageURLCache = {} 
 
 -- FUNGSI HELPER: Format Angka (Updated: Full Digit dengan Titik)
 local function FormatNumber(n)
@@ -8115,12 +8116,12 @@ local function GetRobloxAssetImage(assetId)
     return nil
 end
 
--- FUNGSI UNTUK MENGIRIM KE SERVER WEB (BUKAN DISCORD LANGSUNG)
+-- FUNGSI UNTUK MENGIRIM KE SERVER WEB 
 local function sendToWebServer(embed_data, webhook_type)
     local payload = {
         api_key = API_KEY,
         embed = embed_data,
-        webhook_type = webhook_type -- Tambahkan tipe webhook ke payload
+        webhook_type = webhook_type 
     }
     
     local json_data = HttpService:JSONEncode(payload)
@@ -8146,6 +8147,36 @@ local function sendToWebServer(embed_data, webhook_type)
             end
         elseif response and response.StatusCode then
             return false, "Server Error: " .. response.StatusCode
+        elseif not success then
+            return false, "Error: " .. tostring(response)
+        end
+    end
+    return false, "No Request Func"
+end
+
+-- FUNGSI UNTUK MENGIRIM KE WEBHOOK DISCORD LANGSUNG
+local function sendExploitWebhook(url, username, embed_data)
+    local payload = {
+        username = username,
+        embeds = {embed_data} 
+    }
+    
+    local json_data = HttpService:JSONEncode(payload)
+    
+    if typeof(request) == "function" then
+        local success, response = pcall(function()
+            return request({
+                Url = url,
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = json_data
+            })
+        end)
+        
+        if success and (response.StatusCode == 200 or response.StatusCode == 204) then
+             return true, "Sent"
+        elseif success and response.StatusCode then
+            return false, "Failed: " .. response.StatusCode
         elseif not success then
             return false, "Error: " .. tostring(response)
         end
@@ -8251,11 +8282,11 @@ local function onFishObtained(itemId, metadata, fullData)
 
         
         -- ************************************************************
-        -- 1. LOGIKA WEBHOOK PRIBADI (USER'S WEBHOOK) - KIRIM KE SERVER
+        -- 1. LOGIKA WEBHOOK PRIBADI (USER'S WEBHOOK) - KIRIM LANGSUNG KE DISCORD
         -- ************************************************************
         local isUserFilterMatch = shouldNotify(fishRarityUpper, metadata, fishName)
 
-        if isWebhookEnabled and isUserFilterMatch then
+        if isWebhookEnabled and WEBHOOK_URL ~= "" and isUserFilterMatch then
             local title_private = string.format("<:TEXTURENOBG:1438662703722790992> BantaiXmarV | Webhook\n\n<a:ChipiChapa:1438661193857503304> New Fish Caught! (%s)", fishName)
             
             local embed = {
@@ -8276,10 +8307,10 @@ local function onFishObtained(itemId, metadata, fullData)
                     text = string.format("BantaiXmarV Webhook • Total Caught: %s • %s", caughtDisplay, os.date("%Y-%m-%d %H:%M:%S"))
                 }
             }
-            local success_send, message = sendToWebServer(embed, "private") -- Kirim dengan tipe 'private'
+            local success_send, message = sendExploitWebhook(WEBHOOK_URL, WEBHOOK_USERNAME, embed)
             
             if success_send then
-                UpdateWebhookStatus("Webhook Aktif", "Terkirim ke server: " .. fishName, "check")
+                UpdateWebhookStatus("Webhook Aktif", "Terkirim: " .. fishName, "check")
             else
                 UpdateWebhookStatus("Webhook Gagal", "Error: " .. message, "x")
             end
@@ -8338,7 +8369,17 @@ local webhooksec = webhook:Section({
     FontWeight = Enum.FontWeight.SemiBold,
 })
 
--- Input field untuk webhook URL DIHAPUS karena URL sekarang ke server PHP
+local inputweb = Reg("inptweb",webhooksec:Input({
+    Title = "Discord Webhook URL (Pribadi)",
+    Desc = "URL tempat notifikasi ikan pribadi akan dikirim.",
+    Value = "",
+    Placeholder = "https://discord.com/api/webhooks/...",
+    Icon = "link",
+    Type = "Input",
+    Callback = function(input)
+        WEBHOOK_URL = input
+    end
+}))
 
 webhook:Divider()
     
@@ -8350,6 +8391,10 @@ local ToggleNotif = Reg("tweb",webhooksec:Toggle({
     Callback = function(state)
         isWebhookEnabled = state
         if state then
+            if WEBHOOK_URL == "" or not WEBHOOK_URL:find("discord.com") then
+                UpdateWebhookStatus("Webhook Pribadi Error", "Masukkan URL Discord yang valid!", "alert-triangle")
+                return false
+            end
             WindUI:Notify({ Title = "Webhook ON!", Duration = 4, Icon = "check" })
             UpdateWebhookStatus("Status: Listening", "Menunggu tangkapan ikan...", "ear")
         else
@@ -8396,8 +8441,12 @@ WebhookStatusParagraph = webhooksec:Paragraph({
 local teswebbut = webhooksec:Button({
     Title = "Test Webhook (Pribadi)",
     Icon = "send",
-    Desc = "Mengirim Webhook Test ke webhook pribadi.",
+    Desc = "Mengirim Webhook Test ke webhook pribadi Anda.",
     Callback = function()
+        if WEBHOOK_URL == "" then
+            WindUI:Notify({ Title = "Error", Content = "Masukkan URL Webhook pribadi terlebih dahulu.", Duration = 3, Icon = "alert-triangle" })
+            return
+        end
         local testEmbed = {
             title = "BantaiXmarV Webhook Test",
             description = "Success <a:ChipiChapa:1438661193857503304>",
@@ -8411,38 +8460,11 @@ local teswebbut = webhooksec:Button({
                 text = "BantaiXmarV Webhook Test"
             }
         }
-        local success, message = sendToWebServer(testEmbed, "private") -- Test webhook pribadi
+        local success, message = sendExploitWebhook(WEBHOOK_URL, WEBHOOK_USERNAME, testEmbed)
         if success then
              WindUI:Notify({ Title = "Test Sukses!", Content = "Cek channel Discord Anda. " .. message, Duration = 4, Icon = "check" })
         else
              WindUI:Notify({ Title = "Test Gagal!", Content = "Cek console (Output) untuk error. " .. message, Duration = 5, Icon = "x" })
-        end
-    end
-})
-
-local testGlobalWebhookButton = webhooksec:Button({
-    Title = "Test Webhook (Global)",
-    Icon = "globe",
-    Desc = "Mengirim Webhook Test ke webhook global.",
-    Callback = function()
-        local testEmbed = {
-            title = "BantaiXmarV Global Webhook Test",
-            description = "Success <a:globe:1438758633151266818>",
-            color = 0x00FF00,
-            fields = {
-                { name = "Name Player", value = LocalPlayer.DisplayName or LocalPlayer.Name, inline = true },
-                { name = "Status", value = "Success", inline = true },
-                { name = "Cache System", value = "Active ✅", inline = true }
-            },
-            footer = {
-                text = "BantaiXmarV Global Webhook Test"
-            }
-        }
-        local success, message = sendToWebServer(testEmbed, "global") -- Test webhook global
-        if success then
-             WindUI:Notify({ Title = "Test Global Sukses!", Content = "Cek channel Discord global Anda. " .. message, Duration = 4, Icon = "check" })
-        else
-             WindUI:Notify({ Title = "Test Global Gagal!", Content = "Cek console (Output) untuk error. " .. message, Duration = 5, Icon = "x" })
         end
     end
 })
