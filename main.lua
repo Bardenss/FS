@@ -68,20 +68,14 @@ local Window = WindUI:CreateWindow({
     Icon = "rbxassetid://106735919480937",
     Author = "Premium Version",
     Folder = "BantaiXmarV",
-
     Size = UDim2.fromOffset(600, 360),
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
-
     Transparent = true,
     Theme = "Green Neon",
     Resizable = true,
     SideBarWidth = 190,
-
-    -- Background Foto
-    BackgroundImage = "rbxassetid://17618484057", -- ganti kalau mau
-    BackgroundImageTransparency = 0.35,
-
+    BackgroundImageTransparency = 0.42,
     HideSearchBar = true,
     ScrollBarEnabled = true,
 })
