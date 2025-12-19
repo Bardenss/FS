@@ -1,18 +1,87 @@
 -- [[Whos M? ]]
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+WindUI:AddTheme({
+    Name = "Green Neon",
+
+    Accent = Color3.fromHex("#00ff73"),
+    Background = Color3.fromHex("#0e0e0e"),
+    BackgroundTransparency = 0,
+
+    Outline = Color3.fromHex("#1f1f1f"),
+    Text = Color3.fromHex("#ffffff"),
+    Placeholder = Color3.fromHex("#9f9f9f"),
+    Button = Color3.fromHex("#1e1e1e"),
+    Icon = Color3.fromHex("#9fffbf"),
+    Hover = Color3.fromHex("#00ff73"),
+
+    WindowBackground = Color3.fromHex("#0e0e0e"),
+    WindowShadow = Color3.fromHex("#000000"),
+
+    -- TOP BAR
+    WindowTopbarButtonIcon = Color3.fromHex("#9fffbf"),
+    WindowTopbarTitle = Color3.fromHex("#ffffff"),
+    WindowTopbarAuthor = Color3.fromHex("#9fffbf"),
+    WindowTopbarIcon = Color3.fromHex("#00ff73"),
+
+    -- TAB
+    TabBackground = Color3.fromHex("#101010"),
+    TabTitle = Color3.fromHex("#ffffff"),
+    TabIcon = Color3.fromHex("#9fffbf"),
+
+    -- ELEMENT
+    ElementBackground = Color3.fromHex("#141414"),
+    ElementTitle = Color3.fromHex("#ffffff"),
+    ElementDesc = Color3.fromHex("#cfcfcf"),
+    ElementIcon = Color3.fromHex("#9fffbf"),
+
+    -- POPUP / DIALOG
+    PopupBackground = Color3.fromHex("#0e0e0e"),
+    PopupBackgroundTransparency = 0,
+    PopupTitle = Color3.fromHex("#ffffff"),
+    PopupContent = Color3.fromHex("#dcdcdc"),
+    PopupIcon = Color3.fromHex("#9fffbf"),
+
+    DialogBackground = Color3.fromHex("#0e0e0e"),
+    DialogBackgroundTransparency = 0,
+    DialogTitle = Color3.fromHex("#ffffff"),
+    DialogContent = Color3.fromHex("#dcdcdc"),
+    DialogIcon = Color3.fromHex("#9fffbf"),
+
+    -- TOGGLE
+    Toggle = Color3.fromHex("#1e1e1e"),
+    ToggleBar = Color3.fromHex("#00ff73"),
+
+    -- CHECKBOX
+    Checkbox = Color3.fromHex("#1e1e1e"),
+    CheckboxIcon = Color3.fromHex("#00ff73"),
+
+    -- SLIDER
+    Slider = Color3.fromHex("#1e1e1e"),
+    SliderThumb = Color3.fromHex("#00ff73"),
+})
+
+WindUI:SetTheme("Green Neon")
+
 local Window = WindUI:CreateWindow({
     Title = "BantaiXmarV - Fish It",
     Icon = "rbxassetid://106735919480937",
     Author = "Premium Version",
     Folder = "BantaiXmarV",
+
     Size = UDim2.fromOffset(600, 360),
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
+
     Transparent = true,
-    Theme = "Rose",
+    Theme = "Green Neon",
     Resizable = true,
     SideBarWidth = 190,
-    BackgroundImageTransparency = 0.42,
+
+    -- Background Foto
+    BackgroundImage = "rbxassetid://17618484057", -- ganti kalau mau
+    BackgroundImageTransparency = 0.35,
+
     HideSearchBar = true,
     ScrollBarEnabled = true,
 })
