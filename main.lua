@@ -1751,7 +1751,7 @@ do
                 -- Warna Merah (Inactive) dari kode game yang kamu kasih
                 local InactiveColor = ColorSequence.new({
                     ColorSequenceKeypoint.new(0, Color3.fromHex("ff5d60")), 
-                    ColorSequenceKeypoint.new(1, Color3.fromHex("ff5d60"))
+                    ColorSequenceKeypoint.new(1, Color3.fromHex("ff2256"))
                 })
 
                 while _G.BantaiXmarV_BlatantActive do
