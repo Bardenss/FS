@@ -29,7 +29,9 @@ local Window = WindUI:CreateWindow({
 -- Background Image Settings
 Window:SetBackgroundImage("rbxassetid://106735919480937")
 Window:SetBackgroundImageTransparency(0.9)
-
+local VALID_KEY = "112233"
+local isAuthenticated = false
+local AuthTab = nil
 -- [[ 1. CONFIGURATION SYSTEM SETUP ]] --
 local BantaiXmarVConfig = Window.ConfigManager:CreateConfig("BantaiXmarV")
 
@@ -761,6 +763,7 @@ local FishingAreas = {
         table.insert(AreaNames, name)
     end
 
+local function InitializeMainTabs()
 do
     local player = Window:Tab({
         Title = "Player",
@@ -8668,25 +8671,112 @@ do
 
     about:Space()
 end
+    Window:Tag({
+        Title = "V 1.0.3",
+        Color = Color3.fromHex("#F5C527"),
+        Radius = 9,
+    })
 
-Window:Tag({
-    Title = "V 1.0.3",
-    Color = Color3.fromHex("#F5C527"),
-    Radius = 9,
+    Window:EditOpenButton({
+        Title = "BantaiXmarV - Fish It",
+        Icon = "rbxassetid://106735919480937",
+        CornerRadius = UDim.new(0,30),
+        StrokeThickness = 1.5,
+        Color = ColorSequence.new(
+            Color3.fromHex("00FF00"),
+            Color3.fromHex("FF00FF")
+        ),
+        OnlyMobile = false,
+        Enabled = true,
+        Draggable = true,
+    })
+end
+
+local function OnAuthSuccess()
+    isAuthenticated = true
+    
+    WindUI:Notify({
+        Title = "Authentication Success ✅",
+        Content = "Key valid! Loading main features...",
+        Duration = 3,
+        Icon = "check"
+    })
+    
+    -- Load semua tab utama (Sekarang aman karena function sudah didefinisikan)
+    InitializeMainTabs()
+end
+
+-- ============================================================
+-- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN)
+-- ============================================================
+AuthTab = Window:Tab({
+    Title = "🔐 Authentication",
+    Icon = "lock",
+    Locked = false,
 })
 
-Window:EditOpenButton({
-    Title = "BantaiXmarV - Fish It",
-    Icon = "rbxassetid://106735919480937",
-    CornerRadius = UDim.new(0,30),
-    StrokeThickness = 1.5,
-    Color = ColorSequence.new(
-        Color3.fromHex("00FF00"),
-        Color3.fromHex("FF00FF")
-    ),
-    OnlyMobile = false,
-    Enabled = true,
-    Draggable = true,
+local authSection = AuthTab:Section({
+    Title = "Enter Access Key",
+    TextSize = 20,
+})
+
+authSection:Paragraph({
+    Title = "🔐 Authentication Required",
+    Content = "Please enter the access key to unlock all features.\n\nValid Key: 112233\n\nContact support if you need help.",
+    Icon = "shield"
+})
+
+local enteredKey = ""
+
+authSection:Input({
+    Title = "Access Key",
+    Desc = "Enter your key here (Hint: 112233)",
+    Value = "",
+    Placeholder = "Enter key...",
+    Icon = "key",
+    Callback = function(text)
+        enteredKey = text
+    end
+})
+
+authSection:Button({
+    Title = "Verify Key",
+    Icon = "unlock",
+    Color = Color3.fromRGB(0, 255, 127),
+    Callback = function()
+        if enteredKey == VALID_KEY then
+            OnAuthSuccess() -- ✅ Sekarang aman dipanggil
+        else
+            WindUI:Notify({
+                Title = "Authentication Failed ❌",
+                Content = "Invalid key! Please try again.",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
+    end
+})
+
+authSection:Divider()
+
+authSection:Paragraph({
+    Title = "Need Help?",
+    Content = "Join our Discord: dsc.gg/BantaiXmarV\n\nFor testing, the key is: 112233",
+    Icon = "help-circle",
+    Buttons = {
+        {
+            Title = "Copy Discord Link",
+            Icon = "link",
+            Callback = function()
+                setclipboard("https://dsc.gg/BantaiXmarV")
+                WindUI:Notify({
+                    Title = "Link Copied!",
+                    Duration = 2,
+                    Icon = "copy"
+                })
+            end
+        }
+    }
 })
 
 -- =================================================================
@@ -8853,7 +8943,12 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     InitializeIcon()
 end)
 
-WindUI:Notify({ Title = "BantaiXmarV Was Loaded", Content = "Press [F] to open/close the menu", Duration = 5, Icon = "info" })
+WindUI:Notify({ 
+    Title = "BantaiXmarV Was Loaded", 
+    Content = "Please authenticate to access features", 
+    Duration = 5, 
+    Icon = "info" 
+})
 -- [[ AUTO LOAD & SAVE LOOP ]]
 task.spawn(function()
     task.wait(2) -- Tunggu UI load sempurna
