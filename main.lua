@@ -8744,15 +8744,50 @@ authSection:Button({
     Icon = "unlock",
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
-        if enteredKey == VALID_KEY then
-            OnAuthSuccess()
-        else
-            WindUI:Notify({
-                Title = "Authentication Failed ❌",
-                Content = "Invalid key! Please try again.",
-                Duration = 3,
-                Icon = "x"
+        local enteredKey = enteredKey or ""
+        enteredKey = string.trim(enteredKey)
+
+        if enteredKey == "" then
+            WindUI:Notify({ Title = "Error", Content = "Please enter a key.", Duration = 3, Icon = "x" })
+            return
+        end
+
+        -- Ambil data pengguna dengan HWID yang valid
+        local hwid, hwidMethod = GetHWID()
+        local username = game.Players.LocalPlayer.Name
+
+        -- URL API yang benar (ganti dengan domain Anda)
+        local url = "https://bantaigunung.my.id/admin.php?action=api" 
+       
+        local success, response = pcall(function()
+            return game:GetService("HttpService"):RequestAsync({
+                Url = url,
+                Method = "POST",
+                Headers = {
+                    ["Key"] = enteredKey,
+                    ["Username"] = username,
+                    ["HWID"] = hwid
+                }
             })
+        end)
+        
+        if success then
+            local result = game:GetService("HttpService"):JSONDecode(response.Body)
+            if result and result.status == "success" then
+                isAuthenticated = true
+                Window:SetEnabled(true)
+                if AuthTab then
+                    Window:SetEnabled(false, "Authentication")
+                end
+                WindUI:Notify({ Title = "Authentication Successful!", Content = "All features unlocked.", Duration = 3, Icon = "check" })
+            else
+                -- Tampilkan pesan error spesifik dari server
+                local errorMsg = result.message or "Invalid key!"
+                WindUI:Notify({ Title = "Authentication Failed ❌", Content = errorMsg, Duration = 5, Icon = "x" })
+            end
+        else
+            WindUI:Notify({ Title = "Error", Content = "Failed to connect to server. Check your internet.", Duration = 5, Icon = "x" })
+            print("[AUTH ERROR] Failed to connect to verification server.")
         end
     end
 })
