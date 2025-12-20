@@ -9,7 +9,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 250),
     MaxSize = Vector2.new(950, 760),
     Transparent = true,
-    Theme = "Midnight",
+    Theme = "Solarized",
     Resizable = true,
     SideBarWidth = 190,
     BackgroundImageTransparency = 0.42,
@@ -8707,30 +8707,50 @@ local function OnAuthSuccess()
 end
 
 -- ============================================================
--- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN)
+-- 🔐 AUTHENTICATION TAB (STYLED LIKE ABOUT TAB)
 -- ============================================================
+
 AuthTab = Window:Tab({
-    Title = "🔐 Authentication",
+    Title = "Authentication",
     Icon = "lock",
     Locked = false,
 })
 
-local authSection = AuthTab:Section({
+-- ============================================================
+-- [SECTION 1] HEADER IMAGE (Sama seperti About Tab)
+-- ============================================================
+local authHeader = AuthTab:Section({
+    Title = "BantaiXmarV Premium Access",
+    TextSize = 20,
+})
+
+authHeader:Image({
+    Image = "rbxassetid://106735919480937", 
+    AspectRatio = "16:9",
+    Radius = 9,
+})
+
+authHeader:Space()
+
+-- ============================================================
+-- [SECTION 2] KEY INPUT SYSTEM
+-- ============================================================
+local authKeySection = AuthTab:Section({
     Title = "Enter Access Key",
     TextSize = 20,
 })
 
-authSection:Paragraph({
-    Title = "🔐 Authentication Required",
-    Content = "Please enter the access key to unlock all features.\n\nValid Key: 112233\n\nContact support if you need help.",
+authKeySection:Paragraph({
+    Title = "Authentication Required",
+    Content = "Please enter the access key to unlock all premium features.\n\nIf you don't have a key, contact support on our Discord server.",
     Icon = "shield"
 })
 
 local enteredKey = ""
 
-authSection:Input({
+authKeySection:Input({
     Title = "Access Key",
-    Desc = "Enter your key here (Hint: 112233)",
+    Desc = "Enter your premium key here",
     Value = "",
     Placeholder = "Enter key...",
     Icon = "key",
@@ -8739,13 +8759,13 @@ authSection:Input({
     end
 })
 
-authSection:Button({
-    Title = "Verify Key",
+authKeySection:Button({
+    Title = "[◉] Verify Key",
     Icon = "unlock",
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
         if enteredKey == VALID_KEY then
-            OnAuthSuccess() -- ✅ Sekarang aman dipanggil
+            OnAuthSuccess()
         else
             WindUI:Notify({
                 Title = "Authentication Failed ❌",
@@ -8757,12 +8777,16 @@ authSection:Button({
     end
 })
 
-authSection:Divider()
+authKeySection:Divider()
 
-authSection:Paragraph({
+-- ============================================================
+-- [SECTION 3] DISCORD SUPPORT (Styled like About Tab)
+-- ============================================================
+authKeySection:Paragraph({
     Title = "Need Help?",
-    Content = "Join our Discord: dsc.gg/BantaiXmarV\n\nFor testing, the key is: 112233",
-    Icon = "help-circle",
+    Desc = "Join our Discord community to get your premium key, support, and connect with other users!",
+    Image = "rbxassetid://106735919480937", -- Logo BantaiXmarV (opsional)
+    ImageSize = 24,
     Buttons = {
         {
             Title = "Copy Discord Link",
@@ -8771,12 +8795,37 @@ authSection:Paragraph({
                 setclipboard("https://dsc.gg/BantaiXmarV")
                 WindUI:Notify({
                     Title = "Link Copied!",
-                    Duration = 2,
-                    Icon = "copy"
+                    Content = "Discord link has been copied to clipboard.",
+                    Duration = 3,
+                    Icon = "copy",
                 })
-            end
+            end,
         }
     }
+})
+
+authKeySection:Space()
+
+-- ============================================================
+-- [SECTION 4] INFO TAMBAHAN (Opsional)
+-- ============================================================
+AuthTab:Divider()
+
+local authInfo = AuthTab:Section({
+    Title = "Key Information",
+    TextSize = 18,
+})
+
+authInfo:Paragraph({
+    Title = "How to Get a Key?",
+    Content = "• Join our Discord server: dsc.gg/BantaiXmarV\n• Follow the instructions in #key-system channel\n• For testing purposes, use key: 112233",
+    Icon = "gift"
+})
+
+authInfo:Paragraph({
+    Title = "Premium Features",
+    Content = "• Advanced Auto Farming (Kaitun Mode)\n• Auto Quest System (Ghostfin & Element)\n• Premium Teleports & Auto Events\n• Discord Webhook Integration\n• Priority Support",
+    Icon = "star"
 })
 
 -- =================================================================
