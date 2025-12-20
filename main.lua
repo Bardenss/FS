@@ -8707,50 +8707,30 @@ local function OnAuthSuccess()
 end
 
 -- ============================================================
--- 🔐 AUTHENTICATION TAB (STYLED LIKE ABOUT TAB)
+-- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN)
 -- ============================================================
-
 AuthTab = Window:Tab({
     Title = "Authentication",
     Icon = "lock",
     Locked = false,
 })
 
--- ============================================================
--- [SECTION 1] HEADER IMAGE (Sama seperti About Tab)
--- ============================================================
-local authHeader = AuthTab:Section({
-    Title = "BantaiXmarV Premium Access",
-    TextSize = 20,
-})
-
-authHeader:Image({
-    Image = "rbxassetid://106735919480937", 
-    AspectRatio = "16:9",
-    Radius = 9,
-})
-
-authHeader:Space()
-
--- ============================================================
--- [SECTION 2] KEY INPUT SYSTEM
--- ============================================================
-local authKeySection = AuthTab:Section({
+local authSection = AuthTab:Section({
     Title = "Enter Access Key",
     TextSize = 20,
 })
 
-authKeySection:Paragraph({
+authSection:Paragraph({
     Title = "Authentication Required",
-    Content = "Please enter the access key to unlock all premium features.\n\nIf you don't have a key, contact support on our Discord server.",
+    Content = "Please enter the access key to unlock all features.",
     Icon = "shield"
 })
 
 local enteredKey = ""
 
-authKeySection:Input({
+authSection:Input({
     Title = "Access Key",
-    Desc = "Enter your premium key here",
+    Desc = "Enter your key here",
     Value = "",
     Placeholder = "Enter key...",
     Icon = "key",
@@ -8759,8 +8739,8 @@ authKeySection:Input({
     end
 })
 
-authKeySection:Button({
-    Title = "[◉] Verify Key",
+authSection:Button({
+    Title = "Verify Key",
     Icon = "unlock",
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
@@ -8777,56 +8757,29 @@ authKeySection:Button({
     end
 })
 
-authKeySection:Divider()
+authSection:Divider()
 
--- ============================================================
--- [SECTION 3] DISCORD SUPPORT (Styled like About Tab)
--- ============================================================
-authKeySection:Paragraph({
-    Title = "Need Help?",
-    Desc = "Join our Discord community to get your premium key, support, and connect with other users!",
-    Image = "rbxassetid://106735919480937", -- Logo BantaiXmarV (opsional)
-    ImageSize = 24,
-    Buttons = {
-        {
-            Title = "Copy Discord Link",
-            Icon = "link",
-            Callback = function()
-                setclipboard("https://dsc.gg/BantaiXmarV")
-                WindUI:Notify({
-                    Title = "Link Copied!",
-                    Content = "Discord link has been copied to clipboard.",
-                    Duration = 3,
-                    Icon = "copy",
-                })
-            end,
+authSection:Paragraph({
+        Title = "BantaiXmarV Community",
+        Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
+        Image = "rbxassetid://106735919480937",
+        ImageSize = 24,
+        Buttons = {
+            {
+                Title = "Copy Link",
+                Icon = "link",
+                Callback = function()
+                    setclipboard("https://dsc.gg/BantaiXmarV")
+                    WindUI:Notify({
+                        Title = "Link Disalin!",
+                        Content = "Link Discord BantaiXmarV berhasil disalin.",
+                        Duration = 3,
+                        Icon = "copy",
+                    })
+                end,
+            }
         }
-    }
-})
-
-authKeySection:Space()
-
--- ============================================================
--- [SECTION 4] INFO TAMBAHAN (Opsional)
--- ============================================================
-AuthTab:Divider()
-
-local authInfo = AuthTab:Section({
-    Title = "Key Information",
-    TextSize = 18,
-})
-
-authInfo:Paragraph({
-    Title = "How to Get a Key?",
-    Content = "• Join our Discord server: dsc.gg/BantaiXmarV\n• Follow the instructions in #key-system channel\n• For testing purposes, use key: 112233",
-    Icon = "gift"
-})
-
-authInfo:Paragraph({
-    Title = "Premium Features",
-    Content = "• Advanced Auto Farming (Kaitun Mode)\n• Auto Quest System (Ghostfin & Element)\n• Premium Teleports & Auto Events\n• Discord Webhook Integration\n• Priority Support",
-    Icon = "star"
-})
+    })
 
 -- =================================================================
 -- FLOATING ICON (FIXED: NO GLITCH & SMOOTH DRAG)
