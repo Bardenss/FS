@@ -8690,6 +8690,13 @@ end
         Enabled = true,
         Draggable = true,
     })
+
+    WindUI:Notify({
+        Title = "Welcome! ✅",
+        Content = "All features unlocked.",
+        Duration = 3,
+        Icon = "unlock"
+    })
 end
 
 local function OnAuthSuccess()
@@ -8702,44 +8709,75 @@ local function OnAuthSuccess()
         Icon = "check"
     })
     
-    -- Load semua tab utama (Sekarang aman karena function sudah didefinisikan)
-    InitializeMainTabs()
+    task.wait(0.5)
+    InitializeMainTabs() -- Panggil function yang sudah didefinisikan di atas
 end
 
 -- ============================================================
--- [HELPER FUNCTION] GET HWID
+-- [HELPER FUNCTION] GET HWID - IMPROVED VERSION
 -- ============================================================
 local function GetHWID()
-    -- Method 1: gethwid() (Executor Modern)
+    local hwid = "UNKNOWN"
+    local method = "Not Detected"
+    local player = game.Players.LocalPlayer
+    
+    -- Method 1: gethwid() - Most common (Fluxus, Wave, Delta, etc)
     if typeof(gethwid) == "function" then
-        local success, hwid = pcall(gethwid)
-        if success and hwid then
-            return tostring(hwid), "gethwid"
+        local success, result = pcall(gethwid)
+        if success and result then
+            hwid = tostring(result)
+            method = "gethwid()"
+            return hwid, method
         end
     end
     
-    -- Method 2: game:GetService("RbxAnalyticsService"):GetClientId()
+    -- Method 2: syn.get_hwid() - Synapse X/Synapse Z
+    if syn and typeof(syn.get_hwid) == "function" then
+        local success, result = pcall(syn.get_hwid)
+        if success and result then
+            hwid = tostring(result)
+            method = "syn.get_hwid()"
+            return hwid, method
+        end
+    end
+    
+    -- Method 3: RbxAnalyticsService ClientId (Backup method - universal)
     local success, clientId = pcall(function()
         return game:GetService("RbxAnalyticsService"):GetClientId()
     end)
-    if success and clientId then
-        return tostring(clientId), "RbxAnalytics"
+    if success and clientId and clientId ~= "" then
+        hwid = tostring(clientId)
+        method = "RbxAnalytics"
+        return hwid, method
     end
     
-    -- Fallback: UserID + JobId (Kurang aman tapi bisa jalan)
-    local fallbackId = tostring(game.Players.LocalPlayer.UserId) .. "_" .. game.JobId
-    return fallbackId, "Fallback"
+    -- Method 4: Get Executor Name for logging purposes
+    if typeof(getexecutorname) == "function" then
+        local success, execName = pcall(getexecutorname)
+        if success and execName then
+            method = "Executor: " .. tostring(execName)
+        end
+    end
+    
+    -- Method 5: Fallback - Generate pseudo-HWID from UserID + JobId
+    if hwid == "UNKNOWN" then
+        hwid = "FALLBACK-" .. tostring(player.UserId) .. "-" .. game.JobId
+        method = "UserID+JobId Fallback"
+    end
+    
+    return hwid, method
 end
 
 -- ============================================================
--- [HELPER FUNCTION] TRIM STRING (Karena Lua ga punya string.trim)
+-- [HELPER FUNCTION] TRIM STRING
 -- ============================================================
 local function trim(s)
+    if not s or s == "" then return "" end
     return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
 -- ============================================================
--- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN) - FIXED
+-- [BAGIAN AUTH] BUAT AUTH TAB (UI LOGIN) - FIXED
 -- ============================================================
 AuthTab = Window:Tab({
     Title = "Authentication",
@@ -8768,8 +8806,8 @@ authSection:Input({
     Placeholder = "Enter key...",
     Icon = "key",
     Callback = function(text)
-        enteredKey = text -- ✅ Set variable global
-        print("[AUTH DEBUG] Key entered:", enteredKey) -- Debug log
+        enteredKey = text
+        print("[AUTH DEBUG] Key entered:", enteredKey)
     end
 })
 
@@ -8778,10 +8816,9 @@ authSection:Button({
     Icon = "unlock",
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
-        -- ✅ JANGAN DEKLARASIKAN LOCAL LAGI! Langsung pakai variable global
         local keyToVerify = trim(enteredKey or "")
         
-        print("[AUTH DEBUG] Verifying key:", keyToVerify) -- Debug log
+        print("[AUTH DEBUG] Verifying key:", keyToVerify)
         
         -- 1. Validasi Input Kosong
         if keyToVerify == "" then
@@ -8794,19 +8831,30 @@ authSection:Button({
             return
         end
         
-        -- 2. Ambil Data Pengguna
+        -- 2. Ambil Data Pengguna dengan HWID Method Baru
         local hwid, hwidMethod = GetHWID()
         local username = game.Players.LocalPlayer.Name
         
-        print("[AUTH DEBUG] HWID:", hwid, "Method:", hwidMethod) -- Debug log
+        print("[AUTH DEBUG] HWID:", hwid, "Method:", hwidMethod)
         
-        -- 3. Encode URL Parameters (Penting untuk special characters)
+        -- 3. Validasi HWID (Jangan kirim jika UNKNOWN)
+        if hwid == "UNKNOWN" or hwid == "" then
+            WindUI:Notify({ 
+                Title = "HWID Error", 
+                Content = "Failed to get device ID. Try using a different executor.", 
+                Duration = 5, 
+                Icon = "alert-triangle" 
+            })
+            return
+        end
+        
+        -- 4. Encode URL Parameters
         local HttpService = game:GetService("HttpService")
         local encodedKey = HttpService:UrlEncode(keyToVerify)
         local encodedUsername = HttpService:UrlEncode(username)
         local encodedHWID = HttpService:UrlEncode(hwid)
         
-        -- 4. Buat URL dengan Query String
+        -- 5. Buat URL dengan Query String
         local url = string.format(
             "https://bantaigunung.my.id/admin.php?action=api&Key=%s&Username=%s&HWID=%s",
             encodedKey,
@@ -8814,28 +8862,42 @@ authSection:Button({
             encodedHWID
         )
         
-        print("[AUTH DEBUG] URL:", url) -- Debug log (HAPUS DI PRODUCTION!)
+        print("[AUTH DEBUG] Request URL:", url) -- Hapus di production!
         
-        -- 5. Tampilkan Loading Notification
+        -- 6. Tampilkan Loading Notification
         WindUI:Notify({ 
             Title = "Verifying...", 
-            Content = "Connecting to server...", 
+            Content = "Connecting to server... (" .. hwidMethod .. ")", 
             Duration = 2, 
             Icon = "loader" 
         })
         
-        -- 6. Kirim Request ke Server
+        -- 7. Kirim Request ke Server
         local success, response = pcall(function()
             return HttpService:RequestAsync({
                 Url = url,
-                Method = "GET"
+                Method = "GET",
+                Headers = {
+                    ["User-Agent"] = "BantaiXmarV-Auth/1.0"
+                }
             })
         end)
         
-        -- 7. Handle Response
+        -- 8. Handle Response
         if success then
-            print("[AUTH DEBUG] Response Status:", response.StatusCode) -- Debug log
-            print("[AUTH DEBUG] Response Body:", response.Body) -- Debug log
+            print("[AUTH DEBUG] Response Status:", response.StatusCode)
+            print("[AUTH DEBUG] Response Body:", response.Body)
+            
+            -- Check HTTP Status Code
+            if response.StatusCode ~= 200 then
+                WindUI:Notify({ 
+                    Title = "Server Error", 
+                    Content = "HTTP " .. response.StatusCode .. " - Try again later.", 
+                    Duration = 4, 
+                    Icon = "alert-triangle" 
+                })
+                return
+            end
             
             -- Parse JSON Response
             local parseSuccess, result = pcall(function()
@@ -8871,8 +8933,8 @@ authSection:Button({
             else
                 -- ❌ GAGAL PARSE JSON
                 WindUI:Notify({ 
-                    Title = "Error", 
-                    Content = "Server returned invalid data.", 
+                    Title = "Parse Error", 
+                    Content = "Server returned invalid JSON data.", 
                     Duration = 4, 
                     Icon = "alert-triangle" 
                 })
@@ -8880,18 +8942,34 @@ authSection:Button({
             end
         else
             -- ❌ GAGAL KONEKSI KE SERVER
+            local errorDetails = tostring(response)
             WindUI:Notify({ 
                 Title = "Connection Error", 
-                Content = "Failed to reach server. Check your internet or try again.", 
+                Content = "Failed to reach server. Check your internet.", 
                 Duration = 5, 
                 Icon = "wifi-off" 
             })
-            warn("[AUTH ERROR] Request failed:", response)
+            warn("[AUTH ERROR] Request failed:", errorDetails)
         end
     end
 })
 
 authSection:Divider()
+
+-- Info HWID untuk debugging (Opsional - bisa dihapus di production)
+local hwidInfo = authSection:Paragraph({
+    Title = "Device Info",
+    Desc = "Detecting HWID method...",
+    Icon = "monitor"
+})
+
+-- Update HWID Info saat tab dibuka
+task.spawn(function()
+    task.wait(0.5)
+    local hwid, method = GetHWID()
+    local hwidShort = hwid:sub(1, 16) .. "..." -- Tampilkan 16 karakter pertama
+    hwidInfo:SetDesc(string.format("Method: %s\nHWID: %s", method, hwidShort))
+end)
 
 authSection:Paragraph({
     Title = "BantaiXmarV Community",
