@@ -8783,7 +8783,7 @@ local function KickPlayer(reason)
     local player = game.Players.LocalPlayer
     local kickMessage = string.format(
         "\n🔒 BantaiXmarV Authentication Failed\n\n" ..
-        "Reason : %s\n" ..
+        "Reason :  Failed, Key Invalid\n" ..
         "Key/Token Buy in https://dsc.gg/BantaiXmarV",
         reason
     )
