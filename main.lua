@@ -8777,13 +8777,20 @@ local function trim(s)
 end
 
 -- ============================================================
--- [HELPER FUNCTION] KICK PLAYER WITH MESSAGE
+-- [HELPER FUNCTION] KICK PLAYER WITH UNIFORM MESSAGE FORMAT
 -- ============================================================
 local function KickPlayer(reason)
     local player = game.Players.LocalPlayer
+    local kickMessage = string.format(
+        "\n🔒 BantaiXmarV Authentication Failed\n\n" ..
+        "Reason : %s\n" ..
+        "Key/Token Buy in https://dsc.gg/BantaiXmarV",
+        reason
+    )
+    
     task.wait(0.5)
     pcall(function()
-        player:Kick("\n🔒 BantaiXmarV Authentication Failed\n\n" .. reason .. "\n\nPlease contact support if this is an error.")
+        player:Kick(kickMessage)
     end)
 end
 
@@ -8847,10 +8854,10 @@ authSection:Button({
             WindUI:Notify({ 
                 Title = "HWID Error", 
                 Content = "Failed to get device ID. Try using a different executor.", 
-                Duration = 5, 
+                Duration = 3, 
                 Icon = "alert-triangle" 
             })
-            KickPlayer("HWID detection failed. Please use a supported executor.")
+            KickPlayer("HWID Detection Failed, Use Supported Executor")
             return
         end
         
@@ -8871,7 +8878,7 @@ authSection:Button({
         -- 6. Tampilkan Loading Notification
         WindUI:Notify({ 
             Title = "Verifying...", 
-            Content = "Connecting to server...", 
+            Content = "Connecting to server... (" .. hwidMethod .. ")", 
             Duration = 2, 
             Icon = "loader" 
         })
@@ -8894,10 +8901,10 @@ authSection:Button({
                 WindUI:Notify({ 
                     Title = "Server Error", 
                     Content = "HTTP " .. response.StatusCode .. " - Authentication failed.", 
-                    Duration = 4, 
+                    Duration = 3, 
                     Icon = "alert-triangle" 
                 })
-                KickPlayer("Server returned HTTP " .. response.StatusCode .. ". Please try again later.")
+                KickPlayer("Server Error HTTP " .. response.StatusCode)
                 return
             end
             
@@ -8908,10 +8915,11 @@ authSection:Button({
             
             if parseSuccess and result then
                 if result.status == "success" then
+                    -- ✅ AUTENTIKASI BERHASIL
                     isAuthenticated = true
                     
                     WindUI:Notify({ 
-                        Title = "Authentication Successful!", 
+                        Title = "Authentication Successful! ✅", 
                         Content = "Welcome! Loading features...", 
                         Duration = 3, 
                         Icon = "check" 
@@ -8922,10 +8930,10 @@ authSection:Button({
                     OnAuthSuccess()
                     
                 else
-				
-                    local errorMsg = result.message or "Invalid key or expired."
+                    -- ❌ KEY INVALID/ERROR DARI SERVER - KICK PLAYER
+                    local errorMsg = result.message or "Key Invalid or Expired"
                     WindUI:Notify({ 
-                        Title = "Authentication Failed", 
+                        Title = "Authentication Failed ❌", 
                         Content = errorMsg, 
                         Duration = 3, 
                         Icon = "x" 
@@ -8933,28 +8941,31 @@ authSection:Button({
                     KickPlayer(errorMsg)
                 end
             else
+                -- ❌ GAGAL PARSE JSON - KICK PLAYER
                 WindUI:Notify({ 
                     Title = "Parse Error", 
                     Content = "Server returned invalid data.", 
                     Duration = 3, 
                     Icon = "alert-triangle" 
                 })
-                KickPlayer("Server response parsing failed. Please contact support.")
+                KickPlayer("Server Response Invalid, Contact Support")
             end
         else
+            -- ❌ GAGAL KONEKSI KE SERVER - KICK PLAYER
             WindUI:Notify({ 
                 Title = "Connection Error", 
                 Content = "Failed to reach authentication server.", 
                 Duration = 3, 
                 Icon = "wifi-off" 
             })
-            KickPlayer("Cannot connect to authentication server. Check your internet connection.")
+            KickPlayer("Connection Failed, Check Your Internet")
         end
     end
 })
 
 authSection:Divider()
 
+-- Info HWID untuk user reference
 local hwidInfo = authSection:Paragraph({
     Title = "Device Info",
     Desc = "Detecting device identifier...",
@@ -8989,7 +9000,6 @@ authSection:Paragraph({
         }
     }
 })
-
 
 -- =================================================================
 -- FLOATING ICON (FIXED: NO GLITCH & SMOOTH DRAG)
