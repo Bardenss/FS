@@ -8757,17 +8757,15 @@ authSection:Button({
         local username = game.Players.LocalPlayer.Name
 
         -- URL API yang benar (ganti dengan domain Anda)
-        local url = "https://bantaigunung.my.id/admin.php?action=api" 
-       
+        -- Perubahan: Data dikirim langsung ke URL sebagai query string
+        local url = "https://bantaigunung.my.id/admin.php?action=api&Key=" .. enteredKey .. "&Username=" .. username .. "&HWID=" .. hwid
+        
+        -- Kirim request menggunakan HttpService:RequestAsync dengan method GET
         local success, response = pcall(function()
             return game:GetService("HttpService"):RequestAsync({
                 Url = url,
-                Method = "POST",
-                Headers = {
-                    ["Key"] = enteredKey,
-                    ["Username"] = username,
-                    ["HWID"] = hwid
-                }
+                Method = "GET" -- Menggunakan method GET
+                -- Headers dihapus karena data sudah ada di URL
             })
         end)
         
