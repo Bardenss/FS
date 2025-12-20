@@ -8777,7 +8777,18 @@ local function trim(s)
 end
 
 -- ============================================================
--- [BAGIAN AUTH] BUAT AUTH TAB (UI LOGIN) - FIXED
+-- [HELPER FUNCTION] KICK PLAYER WITH MESSAGE
+-- ============================================================
+local function KickPlayer(reason)
+    local player = game.Players.LocalPlayer
+    task.wait(0.5)
+    pcall(function()
+        player:Kick("\n🔒 BantaiXmarV Authentication Failed\n\n" .. reason .. "\n\nPlease contact support if this is an error.")
+    end)
+end
+
+-- ============================================================
+-- [BAGIAN AUTH] BUAT AUTH TAB (UI LOGIN) - PRODUCTION VERSION
 -- ============================================================
 AuthTab = Window:Tab({
     Title = "Authentication",
@@ -8796,7 +8807,6 @@ authSection:Paragraph({
     Icon = "shield"
 })
 
--- Variable untuk menyimpan key yang diinput user
 local enteredKey = ""
 
 authSection:Input({
@@ -8807,7 +8817,6 @@ authSection:Input({
     Icon = "key",
     Callback = function(text)
         enteredKey = text
-        print("[AUTH DEBUG] Key entered:", enteredKey)
     end
 })
 
@@ -8817,8 +8826,6 @@ authSection:Button({
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
         local keyToVerify = trim(enteredKey or "")
-        
-        print("[AUTH DEBUG] Verifying key:", keyToVerify)
         
         -- 1. Validasi Input Kosong
         if keyToVerify == "" then
@@ -8831,13 +8838,11 @@ authSection:Button({
             return
         end
         
-        -- 2. Ambil Data Pengguna dengan HWID Method Baru
+        -- 2. Ambil Data Pengguna dengan HWID Method
         local hwid, hwidMethod = GetHWID()
         local username = game.Players.LocalPlayer.Name
         
-        print("[AUTH DEBUG] HWID:", hwid, "Method:", hwidMethod)
-        
-        -- 3. Validasi HWID (Jangan kirim jika UNKNOWN)
+        -- 3. Validasi HWID
         if hwid == "UNKNOWN" or hwid == "" then
             WindUI:Notify({ 
                 Title = "HWID Error", 
@@ -8845,6 +8850,7 @@ authSection:Button({
                 Duration = 5, 
                 Icon = "alert-triangle" 
             })
+            KickPlayer("HWID detection failed. Please use a supported executor.")
             return
         end
         
@@ -8862,12 +8868,10 @@ authSection:Button({
             encodedHWID
         )
         
-        print("[AUTH DEBUG] Request URL:", url) -- Hapus di production!
-        
         -- 6. Tampilkan Loading Notification
         WindUI:Notify({ 
             Title = "Verifying...", 
-            Content = "Connecting to server... (" .. hwidMethod .. ")", 
+            Content = "Connecting to server...", 
             Duration = 2, 
             Icon = "loader" 
         })
@@ -8885,17 +8889,15 @@ authSection:Button({
         
         -- 8. Handle Response
         if success then
-            print("[AUTH DEBUG] Response Status:", response.StatusCode)
-            print("[AUTH DEBUG] Response Body:", response.Body)
-            
             -- Check HTTP Status Code
             if response.StatusCode ~= 200 then
                 WindUI:Notify({ 
                     Title = "Server Error", 
-                    Content = "HTTP " .. response.StatusCode .. " - Try again later.", 
+                    Content = "HTTP " .. response.StatusCode .. " - Authentication failed.", 
                     Duration = 4, 
                     Icon = "alert-triangle" 
                 })
+                KickPlayer("Server returned HTTP " .. response.StatusCode .. ". Please try again later.")
                 return
             end
             
@@ -8906,11 +8908,10 @@ authSection:Button({
             
             if parseSuccess and result then
                 if result.status == "success" then
-                    -- ✅ AUTENTIKASI BERHASIL
                     isAuthenticated = true
                     
                     WindUI:Notify({ 
-                        Title = "Authentication Successful! ✅", 
+                        Title = "Authentication Successful!", 
                         Content = "Welcome! Loading features...", 
                         Duration = 3, 
                         Icon = "check" 
@@ -8921,54 +8922,50 @@ authSection:Button({
                     OnAuthSuccess()
                     
                 else
-                    -- ❌ KEY INVALID/ERROR DARI SERVER
+				
                     local errorMsg = result.message or "Invalid key or expired."
                     WindUI:Notify({ 
-                        Title = "Authentication Failed ❌", 
+                        Title = "Authentication Failed", 
                         Content = errorMsg, 
-                        Duration = 5, 
+                        Duration = 3, 
                         Icon = "x" 
                     })
+                    KickPlayer(errorMsg)
                 end
             else
-                -- ❌ GAGAL PARSE JSON
                 WindUI:Notify({ 
                     Title = "Parse Error", 
-                    Content = "Server returned invalid JSON data.", 
-                    Duration = 4, 
+                    Content = "Server returned invalid data.", 
+                    Duration = 3, 
                     Icon = "alert-triangle" 
                 })
-                warn("[AUTH ERROR] Failed to parse JSON:", response.Body)
+                KickPlayer("Server response parsing failed. Please contact support.")
             end
         else
-            -- ❌ GAGAL KONEKSI KE SERVER
-            local errorDetails = tostring(response)
             WindUI:Notify({ 
                 Title = "Connection Error", 
-                Content = "Failed to reach server. Check your internet.", 
-                Duration = 5, 
+                Content = "Failed to reach authentication server.", 
+                Duration = 3, 
                 Icon = "wifi-off" 
             })
-            warn("[AUTH ERROR] Request failed:", errorDetails)
+            KickPlayer("Cannot connect to authentication server. Check your internet connection.")
         end
     end
 })
 
 authSection:Divider()
 
--- Info HWID untuk debugging (Opsional - bisa dihapus di production)
 local hwidInfo = authSection:Paragraph({
     Title = "Device Info",
-    Desc = "Detecting HWID method...",
+    Desc = "Detecting device identifier...",
     Icon = "monitor"
 })
 
--- Update HWID Info saat tab dibuka
 task.spawn(function()
     task.wait(0.5)
     local hwid, method = GetHWID()
-    local hwidShort = hwid:sub(1, 16) .. "..." -- Tampilkan 16 karakter pertama
-    hwidInfo:SetDesc(string.format("Method: %s\nHWID: %s", method, hwidShort))
+    local hwidShort = hwid:sub(1, 16) .. "..."
+    hwidInfo:SetDesc(string.format("Method: %s\nDevice ID: %s", method, hwidShort))
 end)
 
 authSection:Paragraph({
@@ -8992,6 +8989,7 @@ authSection:Paragraph({
         }
     }
 })
+
 
 -- =================================================================
 -- FLOATING ICON (FIXED: NO GLITCH & SMOOTH DRAG)
