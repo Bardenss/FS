@@ -1,52 +1,4 @@
 -- [[Whos M? ]]
--- Custom Authentication GUI
-local authGui = Instance.new("ScreenGui")
-authGui.Name = "AuthGui"
-authGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0.3, 0, 0.2, 0)
-frame.Position = UDim2.new(0.35, 0, 0.4, 0)
-frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-frame.BorderSizePixel = 2
-frame.BorderColor3 = Color3.new(0.5, 0.5, 0.5)
-frame.Parent = authGui
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0.3, 0)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.Text = "Enter Activation Key"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.TextSize = 18
-title.Font = Enum.Font.GothamBold
-title.BackgroundTransparency = 1
-title.Parent = frame
-
-local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(0.8, 0, 0.4, 0)
-textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
-textBox.PlaceholderText = "e.g., 112233"
-textBox.TextColor3 = Color3.new(1, 1, 1)
-textBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-textBox.TextSize = 14
-textBox.Parent = frame
-
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8, 0, 0.3, 0)
-button.Position = UDim2.new(0.1, 0, 0.7, 0)
-button.Text = "Verify Key"
-button.TextColor3 = Color3.new(1, 1, 1)
-button.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-button.TextSize = 14
-button.Parent = frame
-
--- Button Click Handler
-button.MouseButton1Click:Connect(function()
-    local enteredKey = textBox.Text
-    enteredKey = string.match(enteredKey, "^%s*(.-)%s*$") or enteredKey -- Trim spaces
-    
-    if enteredKey == "112233" then -- Valid key
-        authGui:Destroy() -- Remove auth GUI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "BantaiXmarV - Fish It",
@@ -73,6 +25,134 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
+
+-- =================================================================
+-- 🚨 AUTHENTICATION SYSTEM (NEW)
+-- =================================================================
+local VALID_KEY = "112233" -- <-- PASTIKAN INI SAMA DENGAN YANG ANDA MASUKKAN
+local isAuthenticated = false
+local authTabCreated = false
+local menuCreated = false -- Flag untuk mencegah recreate tab
+
+-- Variabel untuk menyimpan key dari input
+local MsukKey = ""
+
+-- Fungsi untuk membuat dan mengaktifkan semua tab utama
+local function createAndUnlockAllTabs()
+    if menuCreated then return end -- Jangan recreate jika sudah ada
+    
+    -- [CONTOH] Buat tab lainnya di sini (ganti dengan tab asli Anda)
+    local farm = Window:Tab({
+        Title = "Fishing",
+        Icon = "fish",
+        Locked = false,
+    })
+    
+    local automatic = Window:Tab({
+        Title = "Automatic",
+        Icon = "loader",
+        Locked = false,
+    })
+    
+    -- Tambahkan tab lainnya sesuai kebutuhan Anda...
+    
+    menuCreated = true
+    Window:SetEnabled(true) -- Aktifkan semua tab setelah create
+end
+
+-- Fungsi untuk mengecek status autentikasi saat script dimuat
+local function CheckAuthStatusOnLoad()
+    if isfile("WindUI/BantaiXmarV/auth_status.txt") then
+        local status = readfile("WindUI/BantaiXmarV/auth_status.txt")
+        if status == "authenticated" then
+            isAuthenticated = true
+            createAndUnlockAllTabs() -- Buat tab karena sudah authenticated
+            -- Nonaktifkan tab autentikasi
+            if authTab then
+                Window:SetEnabled(false, "Authentication")
+            end
+        end
+    end
+end
+
+-- Fungsi untuk verifikasi key
+local function VerifyKey()
+    local enteredKey = MsukKey or ""
+    enteredKey = string.trim(enteredKey) -- Hapus spasi di awal/akhir input
+    
+    -- DEBUG: Cetak nilai ke console untuk memeriksa
+    print("DEBUG: Valid Key = '" .. VALID_KEY .. "'")
+    print("DEBUG: Entered Key = '" .. enteredKey .. "'")
+    
+    if enteredKey == VALID_KEY then
+        isAuthenticated = true
+        
+        -- Buat dan aktifkan semua tab utama
+        createAndUnlockAllTabs()
+        
+        -- Nonaktifkan tab autentikasi
+        if authTab then
+            Window:SetEnabled(false, "Authentication")
+        end
+        
+        WindUI:Notify({ Title = "Authentication Successful!", Content = "All features unlocked.", Duration = 3, Icon = "check" })
+        
+        -- Simpan status autentikasi ke file
+        writefile("WindUI/BantaiXmarV/auth_status.txt", "authenticated")
+        
+    else
+        WindUI:Notify({ Title = "Authentication Failed", Content = "Invalid key. Please try again.", Duration = 3, Icon = "x" })
+    end
+end
+
+-- Buat tab Autentikasi (akan ditampilkan pertama kali)
+local authTab = Window:Tab({
+    Title = "Authentication",
+    Icon = "key",
+    Locked = false,
+})
+
+-- Section untuk judul dan info
+authTab:Section({ 
+    Title = "MarV Script | Key System",
+})
+
+authTab:Divider()
+
+authTab:Paragraph({
+    Title = "Information",
+    Desc = "Untuk mengakses kamu membutuhkan key, silakan masukkan key/token yang telah anda dapat dari bot. Jika Anda belum memiliki key/token, Anda dapat mengambilnya terlebih dahulu melalui server Discord kami: https://marvscript.my.id",
+})
+
+authTab:Divider()
+
+-- Input untuk memasukkan key
+authTab:Input({
+    Title = "[◉] Input Key",
+    Type = "Input",
+    InputIcon = "key",
+    Placeholder = "Masukan key",
+    Callback = function(input) 
+        MsukKey = tostring(input or ""):gsub("%s+", ""):gsub("[\n\r\t]", "")
+    end
+})
+
+-- Tombol verifikasi
+authTab:Button({
+    Title = "Verify Key",
+    Icon = "check-circle",
+    Callback = VerifyKey
+})
+
+-- Mulai: Nonaktifkan semua tab kecuali tab autentikasi
+Window:SetEnabled(false) -- Nonaktifkan semua tab
+Window:SetEnabled(true, "Authentication") -- Aktifkan hanya tab autentikasi
+
+-- Cek status autentikasi saat script dimuat
+CheckAuthStatusOnLoad()
+-- =================================================================
+-- END OF AUTHENTICATION SYSTEM
+-- =================================================================
 
 -- Background Image Settings
 Window:SetBackgroundImage("rbxassetid://106735919480937")
