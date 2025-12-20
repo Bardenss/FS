@@ -8707,7 +8707,39 @@ local function OnAuthSuccess()
 end
 
 -- ============================================================
--- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN)
+-- [HELPER FUNCTION] GET HWID
+-- ============================================================
+local function GetHWID()
+    -- Method 1: gethwid() (Executor Modern)
+    if typeof(gethwid) == "function" then
+        local success, hwid = pcall(gethwid)
+        if success and hwid then
+            return tostring(hwid), "gethwid"
+        end
+    end
+    
+    -- Method 2: game:GetService("RbxAnalyticsService"):GetClientId()
+    local success, clientId = pcall(function()
+        return game:GetService("RbxAnalyticsService"):GetClientId()
+    end)
+    if success and clientId then
+        return tostring(clientId), "RbxAnalytics"
+    end
+    
+    -- Fallback: UserID + JobId (Kurang aman tapi bisa jalan)
+    local fallbackId = tostring(game.Players.LocalPlayer.UserId) .. "_" .. game.JobId
+    return fallbackId, "Fallback"
+end
+
+-- ============================================================
+-- [HELPER FUNCTION] TRIM STRING (Karena Lua ga punya string.trim)
+-- ============================================================
+local function trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+-- ============================================================
+-- [BAGIAN 5] BUAT AUTH TAB (UI LOGIN) - FIXED
 -- ============================================================
 AuthTab = Window:Tab({
     Title = "Authentication",
@@ -8726,6 +8758,7 @@ authSection:Paragraph({
     Icon = "shield"
 })
 
+-- Variable untuk menyimpan key yang diinput user
 local enteredKey = ""
 
 authSection:Input({
@@ -8735,7 +8768,8 @@ authSection:Input({
     Placeholder = "Enter key...",
     Icon = "key",
     Callback = function(text)
-        enteredKey = text
+        enteredKey = text -- ✅ Set variable global
+        print("[AUTH DEBUG] Key entered:", enteredKey) -- Debug log
     end
 })
 
@@ -8744,48 +8778,115 @@ authSection:Button({
     Icon = "unlock",
     Color = Color3.fromRGB(0, 255, 127),
     Callback = function()
-        local enteredKey = enteredKey or ""
-        enteredKey = string.trim(enteredKey)
-
-        if enteredKey == "" then
-            WindUI:Notify({ Title = "Error", Content = "Please enter a key.", Duration = 3, Icon = "x" })
+        -- ✅ JANGAN DEKLARASIKAN LOCAL LAGI! Langsung pakai variable global
+        local keyToVerify = trim(enteredKey or "")
+        
+        print("[AUTH DEBUG] Verifying key:", keyToVerify) -- Debug log
+        
+        -- 1. Validasi Input Kosong
+        if keyToVerify == "" then
+            WindUI:Notify({ 
+                Title = "Error", 
+                Content = "Please enter a key first.", 
+                Duration = 3, 
+                Icon = "x" 
+            })
             return
         end
-
-        -- Ambil data pengguna dengan HWID yang valid
+        
+        -- 2. Ambil Data Pengguna
         local hwid, hwidMethod = GetHWID()
         local username = game.Players.LocalPlayer.Name
-
-        -- URL API yang benar (ganti dengan domain Anda)
-        -- Perubahan: Data dikirim langsung ke URL sebagai query string
-        local url = "https://bantaigunung.my.id/admin.php?action=api&Key=" .. enteredKey .. "&Username=" .. username .. "&HWID=" .. hwid
         
-        -- Kirim request menggunakan HttpService:RequestAsync dengan method GET
+        print("[AUTH DEBUG] HWID:", hwid, "Method:", hwidMethod) -- Debug log
+        
+        -- 3. Encode URL Parameters (Penting untuk special characters)
+        local HttpService = game:GetService("HttpService")
+        local encodedKey = HttpService:UrlEncode(keyToVerify)
+        local encodedUsername = HttpService:UrlEncode(username)
+        local encodedHWID = HttpService:UrlEncode(hwid)
+        
+        -- 4. Buat URL dengan Query String
+        local url = string.format(
+            "https://bantaigunung.my.id/admin.php?action=api&Key=%s&Username=%s&HWID=%s",
+            encodedKey,
+            encodedUsername,
+            encodedHWID
+        )
+        
+        print("[AUTH DEBUG] URL:", url) -- Debug log (HAPUS DI PRODUCTION!)
+        
+        -- 5. Tampilkan Loading Notification
+        WindUI:Notify({ 
+            Title = "Verifying...", 
+            Content = "Connecting to server...", 
+            Duration = 2, 
+            Icon = "loader" 
+        })
+        
+        -- 6. Kirim Request ke Server
         local success, response = pcall(function()
-            return game:GetService("HttpService"):RequestAsync({
+            return HttpService:RequestAsync({
                 Url = url,
-                Method = "GET" -- Menggunakan method GET
-                -- Headers dihapus karena data sudah ada di URL
+                Method = "GET"
             })
         end)
         
+        -- 7. Handle Response
         if success then
-            local result = game:GetService("HttpService"):JSONDecode(response.Body)
-            if result and result.status == "success" then
-                isAuthenticated = true
-                Window:SetEnabled(true)
-                if AuthTab then
-                    Window:SetEnabled(false, "Authentication")
+            print("[AUTH DEBUG] Response Status:", response.StatusCode) -- Debug log
+            print("[AUTH DEBUG] Response Body:", response.Body) -- Debug log
+            
+            -- Parse JSON Response
+            local parseSuccess, result = pcall(function()
+                return HttpService:JSONDecode(response.Body)
+            end)
+            
+            if parseSuccess and result then
+                if result.status == "success" then
+                    -- ✅ AUTENTIKASI BERHASIL
+                    isAuthenticated = true
+                    
+                    WindUI:Notify({ 
+                        Title = "Authentication Successful! ✅", 
+                        Content = "Welcome! Loading features...", 
+                        Duration = 3, 
+                        Icon = "check" 
+                    })
+                    
+                    -- Panggil function untuk load tab utama
+                    task.wait(0.5)
+                    OnAuthSuccess()
+                    
+                else
+                    -- ❌ KEY INVALID/ERROR DARI SERVER
+                    local errorMsg = result.message or "Invalid key or expired."
+                    WindUI:Notify({ 
+                        Title = "Authentication Failed ❌", 
+                        Content = errorMsg, 
+                        Duration = 5, 
+                        Icon = "x" 
+                    })
                 end
-                WindUI:Notify({ Title = "Authentication Successful!", Content = "All features unlocked.", Duration = 3, Icon = "check" })
             else
-                -- Tampilkan pesan error spesifik dari server
-                local errorMsg = result.message or "Invalid key!"
-                WindUI:Notify({ Title = "Authentication Failed ❌", Content = errorMsg, Duration = 5, Icon = "x" })
+                -- ❌ GAGAL PARSE JSON
+                WindUI:Notify({ 
+                    Title = "Error", 
+                    Content = "Server returned invalid data.", 
+                    Duration = 4, 
+                    Icon = "alert-triangle" 
+                })
+                warn("[AUTH ERROR] Failed to parse JSON:", response.Body)
             end
         else
-            WindUI:Notify({ Title = "Error", Content = "Failed to connect to server. Check your internet.", Duration = 5, Icon = "x" })
-            print("[AUTH ERROR] Failed to connect to verification server.")
+            -- ❌ GAGAL KONEKSI KE SERVER
+            WindUI:Notify({ 
+                Title = "Connection Error", 
+                Content = "Failed to reach server. Check your internet or try again.", 
+                Duration = 5, 
+                Icon = "wifi-off" 
+            })
+            warn("[AUTH ERROR] Request failed:", response)
         end
     end
 })
@@ -8793,26 +8894,26 @@ authSection:Button({
 authSection:Divider()
 
 authSection:Paragraph({
-        Title = "BantaiXmarV Community",
-        Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
-        Image = "rbxassetid://106735919480937",
-        ImageSize = 24,
-        Buttons = {
-            {
-                Title = "Copy Link",
-                Icon = "link",
-                Callback = function()
-                    setclipboard("https://dsc.gg/BantaiXmarV")
-                    WindUI:Notify({
-                        Title = "Link Disalin!",
-                        Content = "Link Discord BantaiXmarV berhasil disalin.",
-                        Duration = 3,
-                        Icon = "copy",
-                    })
-                end,
-            }
+    Title = "BantaiXmarV Community",
+    Desc = "Join Our Community Discord Server to get the latest updates, support, and connect with other users!",
+    Image = "rbxassetid://106735919480937",
+    ImageSize = 24,
+    Buttons = {
+        {
+            Title = "Copy Discord Link",
+            Icon = "link",
+            Callback = function()
+                setclipboard("https://dsc.gg/BantaiXmarV")
+                WindUI:Notify({
+                    Title = "Link Copied!",
+                    Content = "Discord link has been copied to clipboard.",
+                    Duration = 3,
+                    Icon = "copy",
+                })
+            end,
         }
-    })
+    }
+})
 
 -- =================================================================
 -- FLOATING ICON (FIXED: NO GLITCH & SMOOTH DRAG)
